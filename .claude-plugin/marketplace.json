@@ -1,0 +1,17 @@
+{
+  "name": "puzzle-skills",
+  "owner": {
+    "name": "Puzzle",
+    "url": "https://puzzleapp.io"
+  },
+  "plugins": [
+    {
+      "name": "puzzle-skills",
+      "source": "./",
+      "description": "Nine skills that make an MCP-connected agent competent in a Puzzle workspace."
+    }
+  ],
+  "metadata": {
+    "description": "Skills for working in a Puzzle workspace through the Puzzle MCP."
+  }
+}
