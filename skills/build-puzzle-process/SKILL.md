@@ -29,6 +29,7 @@ Two rules govern everything else:
 11. **Link what create_process can't carry.** Attributes always link post-build via `link_to_steps` with `type: attribute`. Approver, consulted, and informed roles also link post-build via `link_to_steps` with `type: role` and the right `involvement` (the `role_ids` array in `create_process` covers responsible only). Verify roles and tools landed; patch any misses with `link_to_steps`.
 12. **Verify.** Re-run `list_steps` with includes for roles, tools, attributes, duration, frequency, notes, and connections. Confirm every connection in the handle table received a successful update (the API does not read handles back, so your record of the pass is the verification). Fix any label or handle that reads wrong via `update_workflow`.
 13. **Memorialize in the changelog.** Always, including the handle table and the result of the visual check. See "Changelog" below.
+14. **Offer to share, in one line.** The closing message ends with an offer: a shared view with this section, the team that owns it and the tools it uses. It is an offer, not a question before the build. On a yes, `share-the-map` takes over.
 
 ---
 
@@ -468,6 +469,12 @@ Set `status: completed`, set the owner (`person_id` from `list_people`), then us
 
 ---
 
+## After the build: offer to share
+
+End the closing message with one line: "Want this shared? I can make a shared view with this section, the team that owns it and the tools it uses." Nothing more. If the user says yes, `share-the-map` derives the view from the workspace, asks who it is for, and publishes after approval. If they say nothing, nothing is published. The offer never becomes a question in the intake round.
+
+---
+
 ## Quick pre-flight checklist
 
 Before you call it done, confirm every step has:
@@ -510,6 +517,7 @@ And the process as a whole:
 - [ ] Entities/attributes proposed, approved, created, and linked
 - [ ] A section overview note (why / when / owner / quality bar)
 - [ ] A changelog entry memorializing what was said and done — handle table included — with steps and tools associated
+- [ ] The closing message ends with the one-line offer to share
 - [ ] All of the above resolved through at most ONE intake round
 
 ---
