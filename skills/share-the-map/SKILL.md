@@ -51,6 +51,21 @@ Draft work inside: <none | n steps in Draft or Testing in <section>>
 
 A section with Draft or Testing steps goes public only if the user says so after seeing the count. The audit skill flags the same thing later.
 
+### The push plan
+
+Every proposal that leads to a write ends with this block, before the approval question. Same three verbs every time, `Remove: nothing` spelled out, exact counts from the proposal above it, one sample row with every field the push will set.
+
+```
+Push plan: Shared view
+Add:     <n> <things> (<names, or the first five and "+n more">)
+Change:  <n> <things> (<what changes on them>)
+Remove:  <n> <things> (<names>)   or: nothing
+Sample:  <one row as it will land, every field>
+Nothing is written until you approve. Approve to push, or edit the list.
+```
+
+On an extend, Change lists the items added and Remove lists any dropped; a view is never emptied. The push writes exactly what the block says. Anything discovered mid-push that is not in the block is reported, not pushed. When a push is split into batches, the block says "in N batches", one approval covers them, and a failed batch stops the rest and reports.
+
 ## Build
 
 - New view: `create_shared_view` with `name`, `slug` (lowercase, hyphens, unique in the workspace), `description`, and `items` as `[{type, id}]`.

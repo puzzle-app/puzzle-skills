@@ -52,6 +52,21 @@ Judgment calls: ...
 Need from you: ...
 ```
 
+### The push plan
+
+Every proposal that leads to a write ends with this block, before the approval question. Same three verbs every time, `Remove: nothing` spelled out, exact counts from the proposal above it, one sample row with every field the push will set.
+
+```
+Push plan: Tools canvas, then a second block for the Data model
+Add:     <n> <things> (<names, or the first five and "+n more">)
+Change:  <n> <things> (<what changes on them>)
+Remove:  <n> <things> (<names>)   or: nothing
+Sample:  <one row as it will land, every field>
+Nothing is written until you approve. Approve to push, or edit the list.
+```
+
+One block for the Tools canvas (tools, groups, costs, status) and one for the data model (entities, attributes, links to steps). The push writes exactly what the block says. Anything discovered mid-push that is not in the block is reported, not pushed. When a push is split into batches, the block says "in N batches", one approval covers them, and a failed batch stops the rest and reports.
+
 ## Build
 
 1. **Tools and groups.** `create_tool_structure` with `standalone_tools` by default, and `tool_groups` (new groups with nested `tools` by catalogue `tool_id`, or `tool_group_id` to add to an existing group) only when the Groups rule calls for them. Status and notes go on each tool. Capture the returned `account_tool_id`s, or read them back with `list_tools` scope `workspace`.
@@ -69,6 +84,9 @@ Need from you: ...
 - `list_steps` with `tool_id` for each new tool: the steps that name it are linked.
 
 ## Log it
+
+When `start-here` called this skill as a stage of the round-out, also report back the counts and ids created or changed so it can tick the Workspace entry.
+
 
 A changelog entry with `log-a-decision`: tools added or changed with costs and status, entities and attributes created, assets created with counts by type, the step links made, judgment calls, and what was left out and why. Associate every tool touched by `account_tool_id`.
 

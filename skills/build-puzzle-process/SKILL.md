@@ -238,6 +238,23 @@ Every connection leaving a conditional gets a `label` (see Labels under each gra
 
 ---
 
+### The push plan
+
+Every proposal that leads to a write ends with this block, before the approval question. Same three verbs every time, `Remove: nothing` spelled out, exact counts from the proposal above it, one sample row with every field the push will set.
+
+```
+Push plan: Workflow canvas, then a second block for anything created on other canvases
+Add:     <n> <things> (<names, or the first five and "+n more">)
+Change:  <n> <things> (<what changes on them>)
+Remove:  <n> <things> (<names>)   or: nothing
+Sample:  <one row as it will land, every field>
+Nothing is written until you approve. Approve to push, or edit the list.
+```
+
+The proposal in chat (steps, orientation, conditional trace, handle table) ends with one block for the Workflow canvas (sections, steps, connections, the handle pass) and one for whatever the build creates elsewhere (roles with rates, tools, entities and attributes). The push writes exactly what the block says. Anything discovered mid-push that is not in the block is reported, not pushed. When a push is split into batches, the block says "in N batches", one approval covers them, and a failed batch stops the rest and reports.
+
+---
+
 ## Connectors — the handle table and the handle pass
 
 Connectors carry the visual grammar of the map, and handles are the only part of the layout you set directly. Two mechanics matter:

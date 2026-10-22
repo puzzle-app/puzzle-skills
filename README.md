@@ -14,7 +14,7 @@ They are plain `SKILL.md` files in the open Agent Skills format. Claude Code, Co
 
 | Skill | What the agent can do once it has it | Writes? |
 |---|---|---|
-| [start-here](skills/start-here/SKILL.md) | Get your bearings in a workspace: confirm the MCP is connected, find the owner, read what the four canvases and the changelog already hold, and propose the order of work from that state. Asks one question, records a setup entry the other skills tick off. Not a gate. | Setup entry |
+| [start-here](skills/start-here/SKILL.md) | Where things stand, then round out the workspace. Reads what Puzzle's onboarding and your connected systems already hold, runs five stages (tools, data model, assets, team, people) with a push plan and an approval before each write, rounds out the first map, then offers the next process or an opportunity analysis. Never removes anything. Not a gate. | After approval, per stage |
 | [read-the-map](skills/read-the-map/SKILL.md) | Answer any question from the workspace: walk a process in order, who owns a step, what runs on a tool and what breaks if it changes, what data a step touches, what something costs, why a decision was made, what is outstanding, what is public. The foundation; every other skill loads it first. | No |
 | [build-puzzle-process](skills/build-puzzle-process/SKILL.md) | Build a complete process in one shot, from a description or a transcript: one intake round, as few sections as possible, every step typed, owned, costed and noted, a conditional trace and a handle table for the connectors, a visual check, a changelog entry. | Yes |
 | [interview-for-a-process](skills/interview-for-a-process/SKILL.md) | Prepare the questions for one conversation about one process, in run order, mapped to the fields a step needs. For a teammate, a client, or yourself. | No |
@@ -68,7 +68,7 @@ The skills don't change by role. The reading order does.
 ## How they fit together
 
 ```text
-start-here                  where to begin, from what the workspace already holds
+start-here                  where to begin, and the round-out pass that fills in what onboarding left
         ↓
 interview-for-a-process     what to ask before mapping
         ↓
@@ -87,7 +87,7 @@ audit-the-map               what drifted, fixed in approved batches
 read-the-map                under all of it: the calls, the fields, the vocabulary, how to answer from the map
 ```
 
-Three rules every write skill shares. The agent reads the workspace before it writes, so it extends what exists instead of duplicating it. It proposes the full change in chat and writes only after you approve. It records the change in the changelog with the reasoning, so the map keeps its history.
+Three rules every write skill shares. The agent reads the workspace before it writes, so it extends what exists instead of duplicating it. It proposes the full change in chat, ending with a push plan (Add, Change, Remove, exact counts, one sample row) and writes only after you approve. It records the change in the changelog with the reasoning, so the map keeps its history.
 
 ## What they never do
 
@@ -110,11 +110,12 @@ Fork it, keep the twelve, add the skills your operation needs: a client's naming
 
 ## Related
 
-- [build-puzzle-process](https://github.com/puzzle-app/build-puzzle-process) is the same build skill in its own repo, for people who only want that one.
+- [build-puzzle-process](https://github.com/puzzle-app/build-puzzle-process) was the build skill's own repo before this set existed. Archived; it points here.
 - [grokbot-delivery-team](https://github.com/puzzle-app/grokbot-delivery-team) is a consultancy's delivery team as Grok Bot agents, with Puzzle as the shared memory; several of its skills are the consultant-specific ancestors of these.
 
 ## Versions
 
+- **v1.5** (2026-10-23): start-here rounds out a workspace Puzzle's onboarding has already seeded, in five approved stages, then rounds out the first map; every write skill ends its proposal with the same push plan block. The standalone build-puzzle-process repo is archived.
 - **v1.4** (2026-10-22): share-the-map, and a one-line offer to share at the end of every build.
 - **v1.3** (2026-10-22): build-puzzle-process now builds from a transcript, notes or a document with stated and inferred steps kept apart and confirmed in the intake round; the one-section rule becomes as few sections as possible, 10 to 25 steps each; map-tools-and-data creates tool groups only past twelve tools.
 - **v1.2** (2026-10-22): two more skills. map-tool-assets pulls what lives inside connected tools into the map and links it to steps; start-here is the install and readiness check that proposes where to begin and records a setup entry. map-tools-and-data hands bulk assets to the new skill.

@@ -54,6 +54,21 @@ Present in chat, grouped by tool:
 
 End with one marker: `👉 I need from you: …` with the specific items, or `✅ Nothing needed from you, approve to build`. Create nothing until the user approves.
 
+### The push plan
+
+Every proposal that leads to a write ends with this block, before the approval question. Same three verbs every time, `Remove: nothing` spelled out, exact counts from the proposal above it, one sample row with every field the push will set.
+
+```
+Push plan: Assets
+Add:     <n> <things> (<names, or the first five and "+n more">)
+Change:  <n> <things> (<what changes on them>)
+Remove:  <n> <things> (<names>)   or: nothing
+Sample:  <one row as it will land, every field>
+Nothing is written until you approve. Approve to push, or edit the list.
+```
+
+One block for all assets, with per-tool counts in the Add line; batches of 60. The push writes exactly what the block says. Anything discovered mid-push that is not in the block is reported, not pushed. When a push is split into batches, the block says "in N batches", one approval covers them, and a failed batch stops the rest and reports.
+
 ## 4. Build
 
 `create_assets` in batches of about 60, each with `account_tool_id` (or `tool_id` for a catalogue tool not yet in the workspace), `name`, `type`, `url`, `description`, `status`, and `step_ids` to link on creation.
@@ -108,6 +123,9 @@ One running changelog entry per workspace for asset mapping.
 Each tool section covers counts by type, step links, judgment calls, no-match assets, what was left out and why, and gaps found. Add a line to a "How the data was gathered" section naming the connector and the date.
 
 ## Reply format
+
+When `start-here` called this skill as a stage of the round-out, also report back the counts and ids so it can tick the Workspace entry.
+
 
 - Lead with what was created and linked, by tool, in a few lines.
 - Then judgment calls and gaps.

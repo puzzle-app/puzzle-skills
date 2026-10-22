@@ -11,6 +11,9 @@ Load `read-the-map` first. It carries the calls, the include fields and the two 
 
 ## Scope first
 
+If a "Workspace rounded out" changelog entry exists (`list_changelog_entries`, `query: "rounded out"`), read it first: its unticked stages are the first findings, and the round-out pass in `start-here` is the fix for them.
+
+
 Ask once, if the request doesn't say:
 
 - **How much of the workspace**: the whole thing, one Workflow tab, or one section. Default to one tab; a whole workspace audit on a big map is a long read.
@@ -127,6 +130,21 @@ Scope: <n> sections, <n> steps (<n> Person / <n> Automation / <n> AI Agent; <n> 
 
 👉 I need from you: <the confirmations and inputs, or "approve batch 1 to apply">
 ```
+
+### The push plan
+
+Every proposal that leads to a write ends with this block, before the approval question. Same three verbs every time, `Remove: nothing` spelled out, exact counts from the proposal above it, one sample row with every field the push will set.
+
+```
+Push plan: one batch of fixes
+Add:     <n> <things> (<names, or the first five and "+n more">)
+Change:  <n> <things> (<what changes on them>)
+Remove:  <n> <things> (<names>)   or: nothing
+Sample:  <one row as it will land, every field>
+Nothing is written until you approve. Approve to push, or edit the list.
+```
+
+One block per approved batch, with the fix as the Change line and the step or object ids in the sample row. The push writes exactly what the block says. Anything discovered mid-push that is not in the block is reported, not pushed. When a push is split into batches, the block says "in N batches", one approval covers them, and a failed batch stops the rest and reports.
 
 ## Apply fixes
 

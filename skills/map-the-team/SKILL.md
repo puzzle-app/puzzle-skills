@@ -49,6 +49,21 @@ Present the proposal as two tables, then stop for approval:
 |---|---|---|---|---|
 ```
 
+### The push plan
+
+Every proposal that leads to a write ends with this block, before the approval question. Same three verbs every time, `Remove: nothing` spelled out, exact counts from the proposal above it, one sample row with every field the push will set.
+
+```
+Push plan: Team canvas, then a second block for the People canvas
+Add:     <n> <things> (<names, or the first five and "+n more">)
+Change:  <n> <things> (<what changes on them>)
+Remove:  <n> <things> (<names>)   or: nothing
+Sample:  <one row as it will land, every field>
+Nothing is written until you approve. Approve to push, or edit the list.
+```
+
+One block for the Team canvas (teams, roles, rates, reporting lines) and one for the People canvas (people, role assignments, tool access). The push writes exactly what the block says. Anything discovered mid-push that is not in the block is reported, not pushed. When a push is split into batches, the block says "in N batches", one approval covers them, and a failed batch stops the rest and reports.
+
 ## Build
 
 1. **Teams and roles in one call.** `create_org_structure` with `teams` (new teams with nested `roles`, each with `hourly_rate` and `notes`), `standalone_roles`, and `connections` between role `temp_id`s for the reporting lines. Set `direction`. To add roles to an existing team, pass `team_id` and omit `name`. Reporting lines between existing roles go through `create_role_connections`, using their ids.
@@ -65,6 +80,9 @@ Present the proposal as two tables, then stop for approval:
 - If steps already exist that should be owned by the new roles, link them now: `link_to_steps` with type role and involvement responsible (approver, consulted and informed where they apply).
 
 ## Log it
+
+When `start-here` called this skill as a stage of the round-out, also report back the counts and ids created or changed so it can tick the Workspace entry.
+
 
 Create a changelog entry with `log-a-decision`: the teams and roles created, each rate and its basis, the reporting lines, the people added and their roles, and any role left vacant on purpose. Status completed, owner the person who asked.
 
