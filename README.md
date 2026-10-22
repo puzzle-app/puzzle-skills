@@ -108,6 +108,7 @@ Fork it, keep the nine, add the skills your operation needs: a client's naming c
 
 ## Versions
 
+- **v1.1** (2026-10-22): build-puzzle-process connector rules rewritten. One right-to-left default with three exceptions (automation drop, one-step loop-back, arc past other steps), go-to steps for anything that would cross, structural rules for conditionals set by the `steps` order, a two-call handle pass (default on every connection, then the exceptions), a visual-check fallback chain that includes computer use, and a worked example taken from a map that had gone wrong.
 - **v1.0.1** (2026-10-22): build-puzzle-process description shortened to fit the 1,024-character limit on skill uploads, so the `.skill` file saves in claude.ai, Desktop and Cowork without editing.
 - **v1.0** (2026-10-21): the nine skills, the plugin manifests, the packaged `.skill` files.
 

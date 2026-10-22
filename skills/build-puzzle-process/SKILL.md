@@ -1,6 +1,6 @@
 ---
 name: build-puzzle-process
-description: Build thorough, well-structured processes in any Puzzle workspace via the Puzzle MCP. Load whenever the user asks to "build out this process", "map this in Puzzle", "document this workflow", "create a process for X", or when a workflow needs to become a Puzzle section with steps, executors, roles, tools, conditionals, attributes and notes. Also load when editing or extending an existing Puzzle process. Covers one consolidated intake, one section per process, conditional branches and go-to steps, orientation chosen by shape, a grid sketch traced for zero crossings, a coded connector grammar with a handle table and a mandatory post-build handle pass, a visual check of the built map, step typing and titling, RACI roles with hourly rates, costing inputs, attributes, tools, triggers, delay steps and a changelog entry. When in doubt building anything in Puzzle, use this skill.
+description: Build thorough, well-structured processes in any Puzzle workspace via the Puzzle MCP. Load whenever the user asks to "build out this process", "map this in Puzzle", "document this workflow", "create a process for X", or when a workflow needs to become a Puzzle section with steps, executors, roles, tools, conditionals, attributes and notes. Also load when editing or extending an existing Puzzle process. Covers one consolidated intake, one section per process, conditional branches and go-to steps, orientation chosen by shape, a grid sketch traced for zero crossings, one right-to-left connector default with three exceptions, a handle table, a two-call handle pass, go-to steps for anything that would cross, a visual check of the built map, step typing and titling, RACI roles with hourly rates, costing inputs, attributes, tools, triggers, delay steps and a changelog entry. When in doubt building anything in Puzzle, use this skill.
 ---
 
 # Build a Puzzle Process
@@ -20,12 +20,12 @@ Two rules govern everything else:
 2. **Resolve roles, tools, and data up front.** Roles come from `list_teams` with `include: ['roles.id', 'roles.name', 'roles.hourly_rate']`. Tools come from `list_tools` — query a single comma-separated string of every tool name at once (e.g. `"Attio, QuickBooks, Intercom, monday.com, Claude"`) rather than one call per tool. Check `list_entities` and `list_attributes` for the data objects the process touches. This is how you discover what's missing before you ask about it.
 3. **Draft the full process privately.** Work through every step, branch, and input against the Completeness Checklist below. Every gap you find becomes an intake question.
 4. **Run the single intake round.** One consolidated set of questions covering every missing input (see "The single intake round"). Do the research first (e.g. hourly rates, proposed attributes) so most questions are confirm/adjust rather than open-ended.
-5. **Sketch the grid, then trace every connector.** Before writing the handle table, draw a rough text grid of where each step should land (rows × columns — see "The grid sketch"). Classify every connection by distance (adjacent / same-row peer / deep), assign lanes to the deep ones, and trace every connector on the sketch. The acceptance bar is **zero crossings and zero connectors passing through a step**. Where a crossing can't be avoided, replace that connector with a `go_to` step.
-6. **Propose the full process in chat.** Every step fully specified: name, type, status, executor, roles, tools, attributes, frequency, duration, and a one-line note — plus the orientation (with the reason), the branch wiring, the **grid sketch**, and the **handle table** (see "Connectors"): one row per connection with its pattern code, distance class, lane, label, source handle, and target handle. Let the user evaluate the structure and the layout before anything is written to Puzzle.
+5. **Trace each conditional.** One line per diamond: which outcome continues on the row, which goes above, which goes below, which becomes a go-to (see "The conditional trace"). That line sets the `steps` array order and marks the few connections that are not the default. For three or more conditionals, or any branch that crosses another, also draw the grid sketch. The acceptance bar is **zero crossings and zero connectors passing through a step**; anything that would still cross becomes a `go_to` step.
+6. **Propose the full process in chat.** Every step fully specified: name, type, status, executor, roles, tools, attributes, frequency, duration, and a one-line note — plus the orientation (with the reason), the branch wiring, the **conditional trace** (and the grid sketch when required), and the **handle table** (see "Connectors"): one row per connection with its rule (D, A, B, C, or go-to), label, source handle, and target handle. Let the user evaluate the structure and the layout before anything is written to Puzzle.
 7. **Create missing canvas objects first.** New roles (with hourly rates) on the Team Canvas, new tools on the Tools Canvas, new entities/attributes in the data model. These must exist before the workflow build so IDs are available for linking.
 8. **Build in one call.** Use `create_process` with the full `sections`, `steps`, and `connections` arrays in a single call, wiring connections via `temp_id` references, with `label` set inline on every connection that needs one. Include `role_ids`, `tool_ids`, `duration`, `frequency`, `status`, `executor`, `type`, and `notes` directly on each step. Set `direction`. Capture the returned step IDs. (Connections in `create_process` carry only `from`, `to`, and `label` — handles come next.)
-9. **Run the handle pass.** `list_steps` on the new section with `include: ["connections", "connections.connection_id", "connections.to_step_id", "connections.to_step_name", "connections.label"]` to capture every connection ID, then one `update_workflow` call (split into batches of 25 on big maps) that sets `source_handle` and `target_handle` on **every** connection exactly as the approved handle table says. This is a named, mandatory step — not a "fix any misses" afterthought. A map with default handles is not built.
-10. **Look at the map.** Open the section in the built-in browser, screenshot it, and trace every connector (see "The visual check"). Fix any crossing, pass-through, or hook via `update_workflow`, then screenshot again. The handle table is a prediction of the layout; the screenshot is the proof.
+9. **Run the handle pass, two calls.** `list_steps` on the new section with `include: ["connections", "connections.connection_id", "connections.to_step_id", "connections.to_step_name", "connections.label"]` to capture every connection ID. Call one sets the default on **every** connection (`right → left` in LTR, `bottom → top` in TTB), no exceptions, in batches of 25. Call two sets only the rows the handle table marks A, B or C. Same turn as the build. A connection that misses call one keeps Puzzle's nearest-side default, and a map with nearest-side handles is not built.
+10. **Look at the map.** Screenshot the section (built-in browser, then Claude in Chrome, then computer use on the desktop, then ask the user; see "The visual check") and trace every connector. Fix any crossing, pass-through, or hook via `update_workflow` or a go-to step, then screenshot again. The handle table is a prediction of the layout; the screenshot is the proof. If no screenshot is possible, the changelog entry says the layout is unverified.
 11. **Link what create_process can't carry.** Attributes always link post-build via `link_to_steps` with `type: attribute`. Approver, consulted, and informed roles also link post-build via `link_to_steps` with `type: role` and the right `involvement` (the `role_ids` array in `create_process` covers responsible only). Verify roles and tools landed; patch any misses with `link_to_steps`.
 12. **Verify.** Re-run `list_steps` with includes for roles, tools, attributes, duration, frequency, notes, and connections. Confirm every connection in the handle table received a successful update (the API does not read handles back, so your record of the pass is the verification). Fix any label or handle that reads wrong via `update_workflow`.
 13. **Memorialize in the changelog.** Always, including the handle table and the result of the visual check. See "Changelog" below.
@@ -56,13 +56,13 @@ Per process:
 - Named people mapped to roles (ask if a person's role is unknown)
 - Explicit waits modeled as delay steps (and only explicit ones)
 - Every conditional branch resolves somewhere (loop back, diverge, or converge)
-- Loop-backs farther than three steps modeled as `go_to` steps, not connectors
-- Grid sketched and every connector traced with zero crossings before building
-- Every connection assigned a pattern code, distance class, lane (if deep), and handle pair in the handle table before building
+- Loop-backs longer than one step modeled as `go_to` steps, not connectors
+- Every conditional traced (continue, above, below, go-to); grid sketched when there are three or more conditionals or any branch crosses another
+- Every connection in the handle table with its rule (D by default; A, B, C or go-to by exception) and its handle pair before building
 - Every post-conditional connector labeled
 - No row wrapping and no manual-layout instructions to the user
-- Handle pass executed via `update_workflow` on every connection ID, then verified
-- Visual check done: screenshot taken, every connector traced, fixes applied
+- Handle pass executed as two `update_workflow` calls (the default on every connection ID, then the exceptions), recorded by ID
+- Visual check done: screenshot taken, every connector traced, fixes applied; or the changelog says the layout is unverified
 - Changelog entry written
 
 ---
@@ -107,9 +107,8 @@ Puzzle positions steps with a **Graphviz auto-layout computed from the connectio
 - **Fork** — a conditional splitting into *exclusive* outcomes (one of them happens).
 - **Drop** — Automation / AI Agent steps hung below the step that triggers them.
 - **Rejoin** — a branch's tail entering a spine step.
-- **Handle grammar** — the source handle is the side the arrow *leaves*; the target handle is the side it *arrives*. The router draws orthogonal lines between them; your whole job is choosing the pair that needs the fewest bends, reads in the direction of flow, and never crosses another connector.
+- **Handle grammar** — the source handle is the side the arrow *leaves*; the target handle is the side it *arrives*. The router draws orthogonal lines between them. Puzzle's own default picks the nearest side, which is what produces hooks and lines out of a diamond's bottom; this skill overrides it on every connection.
 - **Flow-facing side** — the side of a step that faces the direction of flow: **right** in LTR, **bottom** in TTB. Its opposite is the **entry side**: left in LTR, top in TTB.
-- **Distance class** — every connection is one of: **adjacent** (target is on the next rank, facing the source), **same-row peer** (target sits beside the source on the same rank), or **deep** (target skips one or more ranks, or sits in a far column/row, so a direct line would pass through or beside other steps).
 - **Lane** — an empty corridor a deep connector travels in: in TTB, a vertical corridor between columns or along the outer left/right edge of the section; in LTR, a horizontal corridor above or below a row. Lanes are what keep long connectors from cutting through steps.
 - **Merge** — two or more connectors headed to the same target sharing one lane and one target handle, so they read as one line instead of crossing.
 
@@ -123,22 +122,25 @@ If the user hasn't said, ask in the intake round — but recommend, and state th
 
 Set it on `create_process` via `direction`.
 
-### Connector principles — apply before any pattern code
+### Connector principles — one default, three exceptions
 
-These govern both orientations. The pattern codes below are how they play out in each direction.
+Puzzle sets a handle on every connection by nearest side. Nearest side is what produces hooks, outcomes leaving a diamond's bottom, and arrows wandering through the middle of a map. This skill overrides it on every connection, with one default and three exceptions, applied without case-by-case judgment.
 
-1. **Conditional outcomes share the flow-facing handle.** Every outcome of a conditional leaves the same side: **right** in LTR, **bottom** in TTB. Each outcome enters the side of its target that faces it: **left** in LTR, **top** in TTB. The layout engine stacks the targets (above/below the row in LTR; left/centre/right in TTB) and the router splits the line. Do **not** send one outcome out the right and another out the bottom of an LTR diamond, and do not send TTB outcomes out the sides by default. The diamond shape and the labels already say "exclusive fork"; handles don't need to.
-2. **Pick handles by distance, not only by pattern.** Classify every connection as adjacent, same-row peer, or deep (see Vocabulary):
-   - **Adjacent** → the default handles (LTR `right → left`, TTB `bottom → top`), shared by all outcomes of a conditional.
-   - **Same-row peer** → side to facing side (LTR: rare, since peers stack vertically; TTB: `right → left` or `left → right`).
-   - **Deep** → a **bypass**: leave through the side that faces an open lane, travel the lane, and enter the target on its entry side or on the side that faces the lane. In LTR this is usually `top → top` (arcing over the row) or `bottom → bottom` (sweeping under it). In TTB it is a side exit (`right` or `left`) into an outer lane, dropping into the target's `top`, or entering its facing side (`right`/`left`) when the lane runs beside it.
-3. **Plan lanes before you write handles.** Give every deep connector a lane. One lane per destination. Connectors headed to the same target **merge** into that lane and share the target handle; they never run parallel lanes that cross each other. Outer lanes (the section's far left/right edge in TTB, above/below everything in LTR) are the safest because nothing sits in them.
-4. **No crossings, no pass-throughs.** A connector must never cross another connector and never run through or along the face of a step it isn't connecting. If the grid trace shows a crossing you can't remove by choosing a different lane or handle, replace that connector with a `go_to` step (see "Go-to steps") — even when the target is downstream, not a loop-back. Clean beats literal.
-5. **Parallel fan-outs are the only non-conditional shared split.** One step feeding N steps that all happen uses the same flow-facing handle (L6 / T-rules), just like a conditional. The difference is carried by step type (a fork is a `conditional`) and labels, not handles.
+1. **One default.** Every connection leaves the flow-facing side and enters the entry side: `right → left` in a left-to-right map, `bottom → top` in a top-to-bottom map. Spine connections, every outcome of a conditional, fan-outs, rejoins, short skips. The layout engine stacks the targets and the router splits the line; the handles stay the same.
+2. **Three exceptions, nothing else.** A: automation drop. B: one-step loop-back. C: arc past other steps. Each is defined in the grammar below. A connection that is not one of those three gets the default.
+3. **Go-to for anything that would still cross.** A connection that would cross a step or another connector after the default and the exceptions becomes a `go_to` step (see "Go-to steps"). Loop-backs longer than one step, a shared target reached from more than one row, a jump across a sub-row: all go-to. A go-to box reads; a crossing arrow does not.
+4. **Conditionals have structure, not special handles.** At most three outcomes, all labeled. The continuing outcome keeps the spine row, a branch with its own steps goes above, a terminator or a skip goes below, and the order of the `steps` array is what puts them there. The diamond shape and the labels already say "exclusive fork"; the handles do not need to.
+5. **Fan-outs are the same shape.** One step feeding N steps that all happen uses the default on every connection. Step type and labels carry the difference, not handles.
 
-### The grid sketch
+### The conditional trace
 
-You can't see the canvas while planning, so draw it. Before the handle table, write a small text grid: one cell per step, rows = ranks in the direction of flow, columns = the branches Graphviz will spread them into. Then draw each connector on it, including its lane. Example (TTB):
+You can't see the canvas while planning, so decide each fork on paper. Before the handle table, write one line per conditional:
+
+```
+<Diamond>: continue = <outcome> → <target on the row> · above = <outcome> → <branch or target> · below = <outcome> → <terminator or skip> · go-to = <outcome> → Go to: <target> (why)
+```
+
+That line sets the `steps` array order after the diamond and marks which rows of the handle table are exceptions or go-tos. For a map with three or more conditionals, or any branch that crosses another, also draw the grid sketch: one cell per step, rows in the direction of flow, every connector traced. Example (TTB):
 
 ```
         [Trigger]
@@ -156,28 +158,24 @@ You can't see the canvas while planning, so draw it. Before the handle table, wr
                                               <Has work email?>
 ```
 
-Trace each line. If two lines cross, or a line runs through a step, change the lane, change the handle, reorder the `steps` array, or use a `go_to` step. Only propose the handle table once the trace is clean. The sketch is a prediction of what Graphviz does; the visual check after the build confirms it.
+Two lines that cross, or a line through a step, mean a different `steps` order, an exception C arc, or a go-to. Only propose the handle table once the trace is clean. The trace is a prediction of what Graphviz does; the visual check after the build confirms it.
 
 ### Left-to-right grammar
 
-Every connection in an LTR map matches one of these patterns. Cite the code in the handle table.
-
-- **L1. Spine.** Every spine connection is `right → left`. Steps sit on one row, evenly spaced. Only override on the patterns that follow.
-- **L2. Conditional — all outcomes leave right.** Every outcome of a conditional, whether 2 or 3, leaves the diamond's **right** handle and enters the **left** of its target: `right → left`, labeled. The continuing / most common outcome keeps the row; the others stack above and below. Each branch then runs `right → left` as its own mini-row. This covers yes/no forks, peer outcomes (two tracks, neither "main"), and three-way splits alike. More than three outcomes → make it a TTB map or split the conditional.
-  - **L2a. Branch with its own steps that rejoins.** The branch's last step leaves `right` and enters the **left** of the rejoin step (`right → left`); the router carries it back to the row. Never rejoin into the bottom or top of a spine step unless it's a deep bypass (L4).
-  - **L2b. Short skip branch.** An outcome that lands on a spine step one or two steps ahead with nothing on the row in between blocking it: `right → left`, merged into the target's left handle.
-- **L3. (Retired.)** Peer outcomes are L2. Kept as a number so older handle tables still read.
-- **L4. Deep bypass — top → top / bottom → bottom.** A branch whose target is several steps downstream (it jumps past steps, conditionals, or sub-rows) must not cut through them. Leave the source from **top** and enter the target's **top** (arcing over everything in between), or `bottom → bottom` if the space above is taken. Pick the side whose lane is empty. Several deep branches to the same target merge into one lane on the same side. If the target sits on an upper or lower row and the lane approaches it from the side, enter its **left**.
-- **L5. (Retired.)** Multi-way outcomes are L2.
-- **L6. Parallel fan-out.** One step feeding N parallel next steps (all happen, no condition): every connection `right → left`; the targets stack in rows above and below the source's row and the router fans them. This is the same handle pair a conditional uses (L2); the source being a non-conditional step, with no labels, is what says "all of these happen." Fan-out branches may each continue as their own mini-spine `right → left` and may converge later (`right → left` into the shared step).
-- **L7. Automation drop.** Automation / AI Agent steps triggered by a spine step hang **below** it: `bottom → top` from the trigger to the first automation, and `bottom → top` again for each automation in the chain, forming a column. If the chain feeds back into the spine, its last step enters the next spine step's **left** (`right → left`). If the space below is already taken by a branch row or a bottom lane, the drop may go above instead: trigger `right` (or `top`) → automation `left`, and the automation re-enters the spine `bottom → top`. Below is the default; above is the fallback.
-- **L8. No wrapping — ever.** The spine is one row, however long. Never break a spine onto a second line, never wire a `bottom → top` "wrap" connection between consecutive spine steps, never ask the user to drag steps. If a spine is long enough that this hurts, the answer is the orientation choice above (go top-to-bottom), not a wrap.
-- **L9. Loop-back within three steps.** From above: `top → top`, arcing over the spine. From below: `bottom → bottom`, sweeping under it. Beyond three steps, no connector at all — a `go_to` step (see "Go-to steps").
-- **L10. Converging triggers and converging exits.** Two entry steps stacked on the left both enter the first spine step `right → left`. Several branches from different steps that land on one shared step (a shared terminator, a common rejoin) **merge**: they share one lane and one target handle — the left when they arrive along the flow, the top (or bottom) when they arrive by a deep bypass lane (L4). Never let two converging lines approach from different sides if that makes them cross.
-- **L11. Labels.** Every connection leaving a conditional carries a label of one to three words; the house style prefixes them with ✅ / ❌ / ➕ where it helps ("✅Yes", "❌No", "➕New", "✅Existing"). Longer labels only when they carry the routing logic itself ("Stalled (25+ L14D)", "no company → skip (under 25)"). Ordinary spine connections in a timed sequence carry timing labels ("Day 0", "+5 days", "cohort close"). Branch labels sit on the horizontal run of the connector, so word them to read there.
-- **L12. Never in LTR.** Never enter a step from its **right**. Never leave a spine step from top or bottom for an adjacent spine connection (top/bottom exits are for drops, L7; deep bypasses, L4; and loop-backs, L9). Never split a conditional's outcomes across the right and bottom handles — they all leave right. Never let a connector cross another connector or run through a step.
+- **D. Default.** `right → left`. Every spine connection, every outcome of a conditional (two or three), every fan-out branch, every rejoin into the spine, every short skip to the next step on the row. The continuing outcome keeps the row; the others stack above and below; each branch then runs `right → left` as its own mini-row and rejoins the spine `right → left` at the first spine step past the fork. If a connection is not A, B or C, it is D.
+- **A. Automation drop.** Automation / AI Agent steps triggered by a spine step hang below it: `bottom → top` from the trigger to the first automation and `bottom → top` down the chain. If the chain feeds back into the spine, its last step enters the next spine step `right → left` (D). If the space below is taken by a branch row, the drop goes above: `top → bottom` into the automation, and it re-enters the spine `right → left`.
+- **B. One-step loop-back.** A step returning to the step immediately before it: `top → top`, arcing over the pair. Any loop-back longer than one step is a go-to step, not a connector.
+- **C. Arc past other steps.** A forward connection whose target is two or more ranks away on a different row, with steps on the direct line between them: `top → top` over the map, or `bottom → bottom` under it when the space above is taken. Several arcs to one target share the same side and the same target handle. An arc that would still cross something is a go-to.
+- **Go-to.** Everything else that would cross. Loop-backs longer than one step. A shared target (a terminator, a common rejoin) reached from conditionals on different rows: only the nearest row connects directly, every other row gets a go-to. A branch that would cut through a sub-row. Built per "Go-to steps".
+- **Structure, set by the `steps` array.** List the spine in order. After each diamond, list the continuing outcome's target first (it stays on the row), then the branch with its own steps (above), then the terminator or skip target (below). List shared terminators last so they land at the edge of the map.
+- **Outcomes.** At most three per conditional. A fourth means two conditionals, or a top-to-bottom map.
+- **Labels.** Every connection leaving a conditional carries a label of one to three words; the house style prefixes them with ✅ / ❌ / ➕ where it helps ("✅Yes", "❌No", "➕New", "✅Existing"). Longer labels only when they carry the routing logic itself ("Stalled (25+ L14D)"). Spine connections in a timed sequence carry timing labels ("Day 0", "+5 days", "cohort close"). Branch labels sit on the horizontal run of the connector, so word them to read there.
+- **No wrapping — ever.** The spine is one row, however long. A spine too long for one row is a reason to go top-to-bottom, never to wrap it and never to ask the user to drag steps.
+- **Never in LTR.** Never enter a step from its right. Never leave a diamond from its top or bottom. Never send one outcome out the right and another out the bottom. Never draw a backward connector longer than one step. Never let two lines into one target arrive from different sides. Never let a connector cross another connector or run through a step.
 
 ### Top-to-bottom grammar
+
+Same shape as LTR: one default (`bottom → top`), the same three exceptions in vertical terms (a side detour with its own steps, a one-step loop-back, a side lane past other steps), and a go-to for anything that would still cross. The T-rules below are the detail.
 
 - **T1. Spine.** Single centre column, every spine connection `bottom → top`.
 - **T2. Conditional — all outcomes leave bottom.** Every outcome whose target is on the next row leaves the **bottom** handle and enters the **top** of its target. Outcomes sit in columns: the continuing/most-common outcome under the diamond, the others to the left and right. Two outcomes → left and right (or centre and one side); three → left, centre, right. Labels sit on the horizontal run. Side handles are **not** used for adjacent outcomes — only for same-row peers (T6) and deep bypasses (T9).
@@ -188,7 +186,7 @@ Every connection in an LTR map matches one of these patterns. Cite the code in t
 - **T4. Side detour with its own steps.** A branch of two or more steps runs down its own side column `bottom → top`, parallel to the spine, and rejoins per T3.
 - **T5. Terminators.** "Skip — …" / "End — …" steps live in a side column and dead-end there with no outgoing connection. Keep them off the spine column so the spine reads as the happy path.
 - **T6. Exception off a non-conditional step.** An exception that fires from an ordinary step leaves that step's side and enters the **opposite side** of a peer step on the same row: `left → right` or `right → left`, labeled with the exception condition ("on batch run failure").
-- **T7. Labels.** Same rule as L11; lowercase, terse labels are the house style in TTB ("matched", "no match", "has domain", "no domain", "hit", "miss").
+- **T7. Labels.** Same rule as the LTR Labels rule; lowercase, terse labels are the house style in TTB ("matched", "no match", "has domain", "no domain", "hit", "miss").
 - **T8. Never in TTB.** Never use `left`/`right` for an adjacent spine connection. Never use `top`/`bottom` for a same-row converge. Never enter a step from its bottom. Never let a connector cross another connector or run through a step.
 - **T9. Deep bypass — side exit into a lane.** When a conditional outcome's target is several rows down or in a far column (so a `bottom → top` line would cut through the steps in between), leave the diamond from the **side facing the target's column** (`right` or `left`), run horizontally to an open lane, travel down the lane, and enter the target's **top** if the lane lands above it, or the target's **facing side** if the lane runs beside it. Use outer lanes (the section's far edge) for the deepest jumps. Multiple deep outcomes headed to the same target (e.g. several "no" branches into one "Return: no phone found" terminator) merge into one lane and one target handle. The normal pairing on a busy TTB diamond is: adjacent outcome out the bottom, deep outcome out the side.
 - **T10. LTR's top → top in TTB terms.** The TTB equivalent of the LTR arc is a side lane: to get past a run of downstream steps without cutting through them, go out the side, down the lane, and back in. Never draw a long `bottom → top` line down the middle of a column that other steps occupy.
@@ -197,9 +195,9 @@ Every connection in an LTR map matches one of these patterns. Cite the code in t
 
 Placement comes from the graph, so build the graph deliberately:
 
-- List steps in the `steps` array in spine order first, then sub-rows / side columns in the order they should appear, then terminators. Graphviz ranks by connection but breaks ties by order.
+- List steps in the `steps` array in spine order first. After each diamond: the continuing outcome's target, then the branch with its own steps, then the terminator or skip target. Then any remaining sub-rows / side columns, then shared terminators last. Graphviz ranks by connection but breaks ties by order, and this order is what puts the continuing outcome on the row, the branch above and the terminator below.
 - Give every branch a real target. A dangling branch collapses the layout.
-- Keep the spine a single path: avoid two connections into the same spine step from the same side unless they are converging by design (L10, T3).
+- Keep the spine a single path: avoid two connections into the same spine step from the same side unless they are converging by design (a rejoin in LTR, T3 in TTB).
 - Order steps so deep targets land at the edges: list a shared terminator (e.g. "Return: no phone found") last so Graphviz pushes it to the bottom/right, where outer lanes can reach it without crossing the middle of the map.
 - Never add "helper" connections to force a shape — every connection must be a real handoff. If a shape can't be reached with real connections plus handles, it isn't a shape this skill produces; pick the orientation that reads best with the real graph and move on.
 - For hybrids, connect the drop from the *triggering* step, not from the step after it, or Graphviz pulls the automation into the spine.
@@ -210,15 +208,15 @@ Placement comes from the graph, so build the graph deliberately:
 
 Wherever the process forks, model it as a **conditional step** (type `conditional`), named as the question it answers: "Did eligibility pass?", "Is the invoice correct?". Then identify which of the three branch patterns applies — this is the single most common thing sloppy builds get wrong:
 
-1. **Loop-back (the rework path).** One branch is a fix/follow-up that returns to earlier work — e.g. "Not approved → revise and resubmit." The follow-up step's outgoing connection goes **back to the step before the conditional** (or whichever earlier step gets redone). No dangling arrows, no dead-end "fix it" boxes. Distance rule: a connector is only right when the target is **three steps back or fewer** — any farther and it becomes a `go_to` step instead (see "Go-to steps"). Wire the connector per L9 (the loop-back arc is unchanged: `top → top` / `bottom → bottom`).
+1. **Loop-back (the rework path).** One branch is a fix/follow-up that returns to earlier work — e.g. "Not approved → revise and resubmit." The follow-up step's outgoing connection goes **back to the step before the conditional** (or whichever earlier step gets redone). No dangling arrows, no dead-end "fix it" boxes. Distance rule: a connector is only right when the target is **the step immediately before** (exception B, `top → top`); any farther and it becomes a `go_to` step instead (see "Go-to steps").
 2. **Full divergence.** The two paths genuinely never recombine — each branch gets its own sequence of steps through to its own end. Terminal branches get a real terminator step (no role or tool; it just ends the flow), never a dangling arrow. In TTB, terminators sit in a side column (T5).
-3. **Diverge-then-converge.** Each branch has two or three unique steps, then both paths land on the **same** downstream step and the process continues as one line. Wire both branch tails into that shared step (L2a rejoin in LTR, T3 in TTB) — do not duplicate the shared step per branch.
+3. **Diverge-then-converge.** Each branch has two or three unique steps, then both paths land on the **same** downstream step and the process continues as one line. Wire both branch tails into that shared step (`right → left` in LTR, T3 in TTB) — do not duplicate the shared step per branch. If the tails would arrive from different sides, the farther one is a go-to.
 
 Map every branch and platform handoff as its own discrete step. Never collapse two outcomes into one box, and never bury a fork in a note.
 
 ### Label every branch
 
-Every connection leaving a conditional gets a `label` per L11 / T7: one to three words, one is ideal. Labels are what make a branch readable without opening a single step.
+Every connection leaving a conditional gets a `label` (see Labels under each grammar): one to three words, one is ideal. Labels are what make a branch readable without opening a single step.
 
 ---
 
@@ -231,22 +229,36 @@ Connectors carry the visual grammar of the map, and handles are the only part of
 
 ### The handle table — a required part of the proposal
 
-Before building, the proposal in chat includes the grid sketch and a table with one row per connection: `from → to`, pattern code (L1–L12 / T1–T10), distance class (adj / peer / deep), lane (for deep rows), `label`, `source_handle`, `target_handle`. The user approves it with the rest of the plan; the handle pass applies it; the changelog records it. This is what makes the layout reproducible and reviewable instead of vibes.
+Before building, the proposal in chat includes the conditional trace (and the grid sketch when required) and a table with one row per connection: `from → to`, rule (D, A, B, C, or go-to), `label`, `source_handle`, `target_handle`. The user approves it with the rest of the plan; the handle pass applies it; the changelog records it. This is what makes the layout reproducible and reviewable instead of vibes.
 
-Worked example 1 — LTR with a yes/no conditional, a short skip, and one automation drop:
+Worked example 1 — LTR, a sales stage with a three-way score and a manager approval. Before this grammar, the map had the 80+ line cutting under the manager diamond's lines and three lines converging on "Close deal as lost" from three sides.
 
-| From → To | Pattern | Dist | Lane | Label | Source | Target |
-|---|---|---|---|---|---|---|
-| Receive signed order form → Is the order over $10k? | L1 | adj | — | — | right | left |
-| Is the order over $10k? → Route order for finance approval | L2 | adj | — | ✅Yes | right | left |
-| Is the order over $10k? → Provision the customer workspace | L2b | adj | — | ❌No | right | left |
-| Route order for finance approval → Provision the customer workspace | L2a | adj | — | — | right | left |
-| Provision the customer workspace → Sync workspace record to Attio | L7 | adj | — | — | bottom | top |
-| Provision the customer workspace → Send kickoff email to customer | L1 | adj | — | — | right | left |
+Conditional trace:
 
-Read it back: both outcomes leave the diamond's right handle; "Yes" stacks above the row and rejoins provisioning from the left, "No" goes straight to provisioning's left; the Attio sync hangs below its trigger; the spine carries on right→left.
+```
+What is the vetting score?: continue = ✅80+ → Move deal to Contract Sent · above = 50–79 → Does the manager approve moving forward? · below = ❌Under 50 → Close deal as lost and set reason
+Does the manager approve moving forward?: continue = ✅Approve → Move deal to Contract Sent · go-to = ❌Decline, 4 days → Go to: Close deal as lost (would cross the spine)
+```
 
-Worked example 2 — TTB enrichment waterfall with deep branches (the "Signup Phone Lookup" pattern):
+| From → To | Rule | Label | Source | Target |
+|---|---|---|---|---|
+| Run intro call in Revenue Hero → Sync meeting outcome to HubSpot | D | — | right | left |
+| Sync meeting outcome to HubSpot → Auto-fill playbook from Grain transcript | D | — | right | left |
+| Auto-fill playbook from Grain transcript → Attest AI fields and finish vetting section | D | — | right | left |
+| Attest AI fields and finish vetting section → What is the vetting score? | D | — | right | left |
+| What is the vetting score? → Move deal to Contract Sent | D | ✅80+ | right | left |
+| What is the vetting score? → Does the manager approve moving forward? | D | 50–79 | right | left |
+| What is the vetting score? → Close deal as lost and set reason | D | ❌Under 50 | right | left |
+| Does the manager approve moving forward? → Move deal to Contract Sent | D | ✅Approve | right | left |
+| Does the manager approve moving forward? → Go to: Close deal as lost | go-to | ❌Decline | right | left |
+| Does the manager approve moving forward? → Go to: Close deal as lost | go-to | 4 days | right | left |
+| Close deal as lost and set reason → End: Closed Lost | D | — | right | left |
+
+`steps` order: the four spine steps, the vetting diamond, Move deal to Contract Sent (continue), the manager diamond (above), Close deal as lost (below), End: Closed Lost, Go to: Close deal as lost.
+
+Read it back: every connection is `right → left`. The three outcomes of the vetting diamond leave its right handle and land on the row (80+), above it (50–79, the manager diamond) and below it (Under 50, Close deal). The manager diamond's Approve rejoins the row from the left. Its Decline and 4-days outcomes would have had to cross the spine to reach Close deal below, so they end in one go-to step. Eleven connections, one go-to, zero crossings.
+
+Worked example 2 — TTB enrichment waterfall with deep branches (the "Signup Phone Lookup" pattern). TTB keeps a lane column, since side lanes are the vertical form of exception C.
 
 | From → To | Pattern | Dist | Lane | Label | Source | Target |
 |---|---|---|---|---|---|---|
@@ -265,31 +277,34 @@ Worked example 2 — TTB enrichment waterfall with deep branches (the "Signup Ph
 
 Read it back: adjacent outcomes drop bottom → top; the deep "no" from "Has name + work domain?" exits right and falls down its own lane into a step several rows below; both "yes" paths into the Attio upsert share one lane and one handle; the outermost "no" runs down the section's edge into the terminator's side; the one line that would have crossed the middle became a go-to step.
 
-### The handle pass
+### The handle pass — two calls
 
-Immediately after `create_process`:
+Immediately after `create_process`, in the same turn:
 
 1. `list_steps` with `section_id` and `include: ["connections", "connections.connection_id", "connections.to_step_id", "connections.to_step_name", "connections.label"]`. Match each returned connection to its handle-table row by from-step, to-step, and label.
-2. One `update_workflow` call with a `connections` array of `{ id, source_handle, target_handle }` for **every** row. The schema caps `steps` at 25 per call; split the `connections` array into batches of 25 on big maps to be safe.
-3. Record which connection IDs were updated. Because the API does not read handles back, that record is the verification — every row in the table must have a successful update against it before the build is called done.
+2. **Call one, the default.** `update_workflow` with a `connections` array of `{ id, source_handle, target_handle }` for **every** connection id, all set to the default (`right`/`left` in LTR, `bottom`/`top` in TTB). No exceptions, no judgment. Batches of 25.
+3. **Call two, the exceptions.** `update_workflow` with only the rows the table marks A, B or C, by id, with their handle pairs.
+4. Record the ids in both calls. The API does not read handles back, so the two successful calls against every id are the verification. A connection missing from call one still carries Puzzle's nearest-side default, and the build is not done.
+
+When you add or rewire connections later (`create_connections`, `update_workflow` with `from_step_id`/`to_step_id`), run the same two calls on the ids you touched.
 
 ### The visual check — look at what you built
 
-The handle table is a prediction; Graphviz decides where steps actually land. So after the handle pass, look:
+The handle table is a prediction; Graphviz decides where steps land. After the handle pass, look:
 
-1. Open the section in the built-in browser (the step or section `url` from `list_steps` / `list_sections`). If the built-in browser is unavailable, use Claude in Chrome; if neither is available or the user isn't logged in to Puzzle there, ask the user for a screenshot instead.
-2. Screenshot the whole section (zoom the canvas to fit if needed; take several screenshots for a large map).
-3. Trace every connector against the handle table. Flag any: crossing another connector; running through or along a step it doesn't connect; entering from the wrong side (L12 / T8); hooking around a corner to reach its handle; doubling back through the step it left; two outcomes of one diamond split across different flow-facing handles.
-4. Fix each flagged connector with `update_workflow` — change the handle pair, move it to another lane (e.g. `top → top` instead of `right → left`), or replace it with a `go_to` step. Update the handle table to match.
+1. Get a screenshot of the section, in this order: the built-in browser (open the section `url` from `list_sections`); Claude in Chrome; computer use, screenshotting the Puzzle window already open on the desktop (read access is enough, no clicking needed); the user, asked for a screenshot. If none of the four is possible, say so, and the changelog entry says "layout unverified".
+2. Screenshot the whole section (zoom the canvas to fit; several screenshots for a large map).
+3. Trace every connector against the handle table. Flag any: crossing another connector; running through or along a step it doesn't connect; entering a step from the wrong side; leaving a diamond from its top or bottom; a backward connector longer than one step; two lines into one target from different sides; hooking around a corner to reach its handle.
+4. Fix each flagged connector with `update_workflow` (the handle pair, or an exception C arc) or replace it with a go-to step. Update the handle table to match.
 5. Screenshot again. Repeat until the trace is clean, then report what you changed in the changelog.
 
-Do not hand the user manual-drag instructions as a fix. Every fix is a handle, a lane, step order, or a go-to step.
+Do not hand the user manual-drag instructions as a fix. Every fix is a handle, the `steps` order, or a go-to step.
 
 ---
 
-## Go-to steps — long loop-backs without the spaghetti
+## Go-to steps — jumps without the spaghetti
 
-When a step deep in the process loops back to a step **more than three steps upstream**, do not draw a connector — a long backward arrow stretches across the map, crosses everything in its path, and turns the diagram into spaghetti. Use the `go_to` step type instead. This rule applies to **every** loop-back farther than three steps, whatever caused it: a rework branch off a conditional, a retry, a restart, an escalation that re-enters earlier in the flow.
+When a step loops back to anything **other than the step immediately before it**, do not draw a connector — a backward arrow stretches across the map, crosses everything in its path, and turns the diagram into spaghetti. Use the `go_to` step type instead. This rule applies to **every** loop-back longer than one step, whatever caused it: a rework branch off a conditional, a retry, a restart, an escalation that re-enters earlier in the flow.
 
 How to build one:
 
@@ -298,9 +313,9 @@ How to build one:
 3. **Spell out the destination in the note**: name the exact target step (and its section if ambiguous), why the flow returns there, and the condition that sent it back. The note is what lets the user wire the jump themselves in the go-to step sidebar — write it so there's zero guesswork about which step to pick.
 4. **No backward connector.** The go-to step is the terminus of that branch on the canvas; the jump itself is configured in the sidebar, not drawn. Label the connection *into* the go-to step like any post-conditional branch (1–3 words).
 
-The three-steps rule cuts both ways: within three steps, a connector with proper handles (L9) reads fine and a go-to step would be overkill; beyond three, always the go-to step. Count steps along the main flow between the looping step and its target — branches don't count.
+The one-step rule cuts both ways: to the step immediately before, a `top → top` connector (exception B) reads fine and a go-to step would be overkill; any farther, always the go-to step.
 
-**Go-to steps also fix unavoidable crossings.** When a *forward* branch can't reach its target without crossing another connector — no free lane, no handle pair that avoids it — use a go-to step to the target instead of the connector, built the same way (named "Go to: [target]", destination in the note). Typical case: several branches that all end at one shared terminator from opposite sides of the map; the ones on the far side get a go-to.
+**Go-to steps also fix unavoidable crossings.** When a *forward* branch can't reach its target without crossing another connector — no free lane, no handle pair that avoids it — use a go-to step to the target instead of the connector, built the same way (named "Go to: [target]", destination in the note). Typical cases: several branches that all end at one shared terminator from different rows, where only the nearest row connects directly and the others get a go-to; a conditional above the spine whose exit must reach a terminator below it; a branch that would cut through a sub-row.
 
 ---
 
@@ -324,7 +339,7 @@ Every step gets an `executor` — the field most often skipped, so set it explic
 - **Automation** — software runs it automatically.
 - **AI Agent** — an agent runs it.
 
-The executor split drives costing, layout, and attributes: manual (Person) steps carry duration + frequency and a responsible role; Automation/AI Agent steps hang as drops (L7) in hybrid layouts and carry the attributes they populate.
+The executor split drives costing, layout, and attributes: manual (Person) steps carry duration + frequency and a responsible role; Automation/AI Agent steps hang as drops (exception A) in hybrid layouts and carry the attributes they populate.
 
 ---
 
@@ -456,24 +471,23 @@ And the process as a whole:
 - [ ] One section, all steps inside
 - [ ] Trigger asked about (if unstated) — the first step is what kicks the process off
 - [ ] Orientation chosen by shape (LTR timeline / TTB pipeline / LTR hybrid with drops) and stated with a reason
-- [ ] Grid sketched; every connector traced on it with zero crossings and zero pass-throughs
-- [ ] Every connection assigned a pattern code, distance class, lane (if deep), and handle pair in the handle table before building
-- [ ] LTR conditionals: all outcomes leave **right** and enter the **left** of their targets (no right/bottom split)
-- [ ] TTB conditionals: adjacent outcomes leave **bottom** and enter **top**; side exits only for same-row peers and deep bypasses
-- [ ] Deep branches travel a lane (LTR `top → top` / `bottom → bottom`; TTB side exit into a lane) instead of cutting through downstream steps
-- [ ] Connectors to the same target merge into one lane and one target handle
+- [ ] Every conditional traced: continue on the row, branch above, terminator or skip below, go-to where it would cross; at most three outcomes, all labeled
+- [ ] Grid sketched when there are three or more conditionals or any branch crosses another
+- [ ] Every connection in the handle table with its rule (D, A, B, C, or go-to) and handle pair before building
+- [ ] LTR: every connection `right → left` except automation drops (A), one-step loop-backs (B) and arcs past other steps (C); TTB: every connection `bottom → top` with the matching exceptions
+- [ ] A target reached from conditionals on different rows connects directly from the nearest row only; the rest are go-to steps
 - [ ] Any crossing that couldn't be designed away replaced with a `go_to` step
-- [ ] Automation drops hang bottom → top under their trigger
+- [ ] `steps` array ordered: spine, then per diamond continue / above / below, shared terminators last
 - [ ] No row wrapping and no manual-layout instructions to the user; a long linear spine is a reason to choose top-to-bottom
-- [ ] Nothing enters a step from the "wrong" side for its orientation (L12 / T8)
-- [ ] Visual check done: section screenshotted, every connector traced, fixes applied and re-screenshotted
+- [ ] Nothing enters a step from the "wrong" side; nothing leaves a diamond's top or bottom
+- [ ] Visual check done: section screenshotted (browser, Chrome, computer use, or the user), every connector traced, fixes applied and re-screenshotted; or the changelog says the layout is unverified
 - [ ] Named people resolved to roles on the People Canvas (created via `create_people` + `add_person_roles` if missing)
 - [ ] Explicitly mentioned waits modeled as `delay` steps — and no speculative delays inserted
 - [ ] Every conditional matched to its pattern: loop-back, full divergence, or diverge-then-converge
 - [ ] Loop-back branches wired to the step before the conditional; terminal branches given real terminator steps; converging branches landing on one shared step
-- [ ] Every loop-back farther than three steps built as a `go_to` step named "Go to: [target step]", with the destination spelled out in the note — no long backward connectors anywhere
+- [ ] Every loop-back longer than one step built as a `go_to` step named "Go to: [target step]", with the destination spelled out in the note — no backward connectors beyond `top → top` to the previous step
 - [ ] Every post-conditional connection labeled (1–3 words)
-- [ ] Handle pass executed via `update_workflow` on every connection ID, then verified
+- [ ] Handle pass executed as two `update_workflow` calls (default on every connection ID, then the exceptions), recorded by ID
 - [ ] New roles created with researched, confirmed hourly rates
 - [ ] New tools added to the Tools Canvas and linked
 - [ ] Entities/attributes proposed, approved, created, and linked
@@ -493,5 +507,5 @@ And the process as a whole:
 - To rewire an existing arrow without deleting it: `list_steps` with connection includes to get the connection ID, then `update_workflow` with a `connections` array (`id`, `from_step_id`, `to_step_id`, `source_handle`, `target_handle`, `label`) to redirect in place.
 - Capture returned step IDs immediately — every later `update_workflow`, `link_to_steps`, and changelog association needs them.
 - `update_workflow` takes max 25 steps per call — batch accordingly on big processes, and split large `connections` arrays the same way.
-- Edit in place. When extending a process, update existing steps and connections rather than tearing down and rebuilding — and run the handle pass on every connection you add.
+- Edit in place. When extending a process, update existing steps and connections rather than tearing down and rebuilding — and run the two-call handle pass on every connection you add or rewire.
 - Verify after building: `list_steps` with `include` for roles, tools, attributes, duration, frequency, and connections. A field missing from a response means you didn't request it, not that it's empty — include what you're checking.
