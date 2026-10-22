@@ -108,6 +108,7 @@ Fork it, keep the nine, add the skills your operation needs: a client's naming c
 
 ## Versions
 
+- **v1.0.1** (2026-10-22): build-puzzle-process description shortened to fit the 1,024-character limit on skill uploads, so the `.skill` file saves in claude.ai, Desktop and Cowork without editing.
 - **v1.0** (2026-10-21): the nine skills, the plugin manifests, the packaged `.skill` files.
 
 ## License
