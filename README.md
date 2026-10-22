@@ -112,6 +112,7 @@ Fork it, keep the eleven, add the skills your operation needs: a client's naming
 
 ## Versions
 
+- **v1.3** (2026-10-22): build-puzzle-process now builds from a transcript, notes or a document with stated and inferred steps kept apart and confirmed in the intake round; the one-section rule becomes as few sections as possible, 10 to 25 steps each; map-tools-and-data creates tool groups only past twelve tools.
 - **v1.2** (2026-10-22): two more skills. map-tool-assets pulls what lives inside connected tools into the map and links it to steps; start-here is the install and readiness check that proposes where to begin and records a setup entry. map-tools-and-data hands bulk assets to the new skill.
 - **v1.1** (2026-10-22): build-puzzle-process connector rules rewritten. One right-to-left default with three exceptions (automation drop, one-step loop-back, arc past other steps), go-to steps for anything that would cross, structural rules for conditionals set by the `steps` order, a two-call handle pass (default on every connection, then the exceptions), a visual-check fallback chain that includes computer use, and a worked example taken from a map that had gone wrong.
 - **v1.0.1** (2026-10-22): build-puzzle-process description shortened to fit the 1,024-character limit on skill uploads, so the `.skill` file saves in claude.ai, Desktop and Cowork without editing.
