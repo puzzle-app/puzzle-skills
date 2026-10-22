@@ -1,6 +1,6 @@
 ---
 name: build-puzzle-process
-description: Build thorough processes in any Puzzle workspace via the Puzzle MCP. Load whenever the user asks to "build out this process", "map this in Puzzle", "document this workflow", "create a process for X", "turn this transcript into a map", or when a workflow needs to become a Puzzle section with steps, executors, roles, tools, conditionals, attributes and notes. Also load when editing or extending an existing Puzzle process. Covers one consolidated intake, as few sections as possible (10 to 25 steps each), conditional branches and go-to steps, orientation chosen by shape, a grid sketch traced for zero crossings, one right-to-left connector default with three exceptions, a handle table, a two-call handle pass, go-to steps for anything that would cross, a visual check of the built map, step typing and titling, RACI roles with hourly rates, costing inputs, attributes, tools, triggers, delay steps and a changelog entry. When in doubt building anything in Puzzle, use this skill.
+description: Build thorough processes in any Puzzle workspace via the Puzzle MCP. Load whenever the user asks to "build out this process", "map this in Puzzle", "document this workflow", "create a process for X", "turn this transcript into a map", "map how our [tool] is set up", or when a workflow needs to become a Puzzle section with steps, executors, roles, tools, conditionals, attributes and notes. Also load when editing or extending an existing Puzzle process. Covers one consolidated intake, as few sections as possible (10 to 25 steps each), conditional branches and go-to steps, orientation chosen by shape, a conditional trace, one right-to-left connector default with three exceptions, a handle table, a two-call handle pass, go-to steps for anything that would cross, a visual check of the built map, step typing and titling, RACI roles with hourly rates, costing inputs, attributes, tools, triggers, delay steps and a changelog entry. When in doubt building anything in Puzzle, use this skill.
 ---
 
 # Build a Puzzle Process
@@ -106,6 +106,20 @@ A call transcript, meeting notes, an old SOP, a screen recording's transcript, a
 3. **Ask the three things a transcript never says.** What happens before the part they described (the trigger). What happens when it goes wrong (the exceptions). What has changed since the conversation (the status). If the conversation hasn't happened yet, `interview-for-a-process` prepares it.
 4. **Propose before building, as always**, with stated and inferred steps shown distinctly. The user's approval is what turns an inferred step into a stated one.
 5. **Name the source in the changelog entry**: the call and its date, or the document, and which steps were inferred and then confirmed, so a later reader knows where each step came from.
+
+## When the source is a tool's configuration
+
+"Map how our HubSpot is set up", "diagram our ClickUp", "document our Zapier". The process already exists, inside a system, as stages, statuses, views and automations. Read it through the tool's connector (or screenshots and exports when there is none) and build it as a section on the Workflow canvas, so the tool's own flow sits on the same map as the people around it.
+
+- **Pipelines and stages become steps.** A pipeline, board or status flow is the spine: one step per stage, named with the stage's own name ("Move deal to Contract Sent"), executor Person unless the tool moves it, the tool as the step's tool, the stage's fields as attributes.
+- **Automations become Automation steps.** Each workflow, Zap, sequence or trigger in the tool is a step hung under the stage that fires it (exception A), named "Trigger: <what fires it>" then what it does, executor Automation, with the automation itself linked as an asset (`map-tool-assets`) so the step points at the real thing.
+- **Views, forms and templates are assets, not steps.** Link them to the steps that use them.
+- **Conditions in the tool are conditionals on the map.** A workflow branch ("if deal amount over 10k") is a `conditional` step with labeled outcomes, same grammar as any other.
+- **What to read, by kind of tool.** A CRM: pipelines, stages, properties, workflows, sequences. A work-management tool: boards, groups or lists, status columns, automations, forms. An automation platform: each workflow's trigger, steps and the apps it touches; the map step is one per workflow, not one per action inside it, unless the user wants the inside mapped. An email marketing tool: lists, sequences, triggers.
+- **The section's note** carries the tool, the date read, and what was left out (inactive automations, archived pipelines), so the map says what it reflects.
+- **This is one process per pipeline.** A tool with three pipelines is three sections, or one section per pipeline inside the as-few-sections rule.
+
+Everything else is unchanged: one intake round for what the configuration doesn't say (who does each stage, how long, how often), the proposal with the push plan, the handle pass, the changelog entry naming the tool as the source.
 
 ---
 

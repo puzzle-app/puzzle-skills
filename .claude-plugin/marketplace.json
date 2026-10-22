@@ -8,7 +8,7 @@
     {
       "name": "puzzle-skills",
       "source": "./",
-      "description": "Twelve skills that make an MCP-connected agent competent in a Puzzle workspace."
+      "description": "Fifteen skills that make an MCP-connected agent competent in a Puzzle workspace."
     }
   ],
   "metadata": {

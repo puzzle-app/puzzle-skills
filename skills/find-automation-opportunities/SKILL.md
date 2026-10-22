@@ -1,6 +1,6 @@
 ---
 name: find-automation-opportunities
-description: Read a Puzzle workspace through the Puzzle MCP and find every step that could be automated, handed to an AI agent, or AI-assisted, grouped into opportunities, ranked, with the steps each touches, the prerequisites, the phase it lands in, and hours returned only where the costing inputs make the figure defensible. Load when the user asks "what could we automate", "where does AI fit", "which steps should an agent do", "automation roadmap", "AI opportunity roadmap", "what should we build next", or wants a future state drafted from the current state. Output is a ranked roadmap proposed in chat; building it is build-puzzle-process on a future state tab.
+description: Read a Puzzle workspace through the Puzzle MCP and find every improvement the map shows: steps that could be automated, handed to an AI agent, or AI-assisted, and the bottlenecks, waits, hand-backs and ownership gaps that slow a process down, grouped into opportunities, tiered (critical, high impact, quick win), with the steps each touches, the prerequisites, the phase it lands in, and hours returned only where the costing inputs make the figure defensible. Load when the user asks "what could we automate", "where does AI fit", "where are the bottlenecks", "what's slowing this down", "what could we improve", "what should we build next", or wants a future state drafted. Output is a ranked roadmap in chat; building it is build-puzzle-process on a future state tab.
 ---
 
 # Find automation opportunities
@@ -24,6 +24,19 @@ Load `read-the-map` first. Use `cost-a-process` for any dollar figure.
 4. `list_tools` scope `workspace` with `include: ["status", "notes"]` for what is already in the stack, and which of it has an API or an automation connector.
 5. `list_changelog_entries` with `query` on words like "automate", "agent", "integration", "Zapier", "Make", "n8n" to find what was already decided.
 
+## Read the friction, not only the automation candidates
+
+Before classifying, read each section in flow order and mark what slows it:
+
+- **Bottlenecks**: a step every branch passes through that one role owns, with a high frequency or a long duration; a conditional whose rework branch loops often (the note says so, or the user does).
+- **Waits**: `delay` steps and notes that say "wait for", "chase", "remind". Where a wait exists because a hand-off has no notification, that is a candidate.
+- **Hand-backs**: a loop-back or go-to that returns work to an earlier role. Each one is a question: why does it come back, and could the first pass catch it.
+- **Ownership gaps**: a Person step with no responsible role, a conditional with no one deciding it, a section with no owner in its note, an approver on a step that never waits for approval.
+- **Double entry**: two steps in different tools writing the same attribute (the data model shows it); a step whose note says "copy", "re-enter", "same as".
+- **Dead ends**: a branch that ends with no terminator, a status Draft inside a Live section.
+
+Each of these is an opportunity whether or not software fixes it. Some are fixed by a rule, a template, or moving a step; say which.
+
 ## Classify every Person step
 
 One of four:
@@ -42,6 +55,14 @@ One opportunity is one coherent change, not one step: a handoff automated end to
 ## Prerequisites
 
 For each opportunity, name what must be true first: the system and whether it is in the stack; the data that must exist and be clean (the attributes the steps rely on); the integration or connector; the decision the user must make (a tool choice, a policy); the build that must come before it. An opportunity with an unmet prerequisite cannot land in the first phase.
+
+## Tier, then rank
+
+Every opportunity gets a tier before a rank:
+
+- 🔴 **Critical**: something is broken or blocked today: a dead end, an ownership gap on a Live step, a bottleneck the user has already named as pain.
+- 🟡 **High impact**: a hand-off, wait or double entry on a high-frequency path; an automation or agent candidate with many hours per month behind it.
+- 🟢 **Quick win**: one step, one tool, prerequisites met, low risk; a rule or a template rather than a build.
 
 ## Rank
 
@@ -63,12 +84,13 @@ For each opportunity, name what must be true first: the system and whether it is
 From the current state map on <date>. <n> sections, <n> Person steps reviewed.
 
 ## Summary
-- <n> opportunities: <n> automate, <n> AI agent, <n> assist
+- <n> opportunities: <n> automate, <n> AI agent, <n> assist, <n> process fixes (bottleneck, wait, hand-back, ownership, double entry)
+- 🔴 <n> critical · 🟡 <n> high impact · 🟢 <n> quick wins
 - Now: <n>. Next: <n>. Later: <n>.
 - Hours per month returned where defensible: <n> (on <n> of <n> steps with costing inputs)
 
 ## Ranked opportunities
-### 1. <Name>: <Automate | AI agent | Assist>
+### 1. <Name>: <Automate | AI agent | Assist | Fix> · 🔴|🟡|🟢
 Steps touched: <section: step (id), ...>
 Pain resolved: <from notes, changelog, interview, or "none recorded">
 What changes: <two lines: who or what does it after, and what the human still does>
@@ -88,6 +110,10 @@ Risk: <one line>
 ## Steps missing inputs that would make the figures defensible
 - ...
 ```
+
+## Annotating the map (opt in)
+
+The user can ask for the findings written onto the steps they concern: one line at the top of the step's note ("Opportunity: <name>, <tier>, <date>"), through `update_workflow`, proposed as a push plan and pushed only on approval. Never annotate without being asked; a map covered in flags is a worse map.
 
 ## From roadmap to map
 

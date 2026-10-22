@@ -1,6 +1,6 @@
 {
   "name": "puzzle-skills",
-  "description": "Twelve skills that make an MCP-connected agent competent in a Puzzle workspace: start in the right place, read the map, build a process, interview for one, map the team, map tools and data, map the assets inside them, log a decision, cost a process, find automation opportunities, audit the map.",
+  "description": "Fifteen skills that make an MCP-connected agent competent in a Puzzle workspace: start in the right place, read the map, build a process, interview for one, map the team, map tools and data, map the assets inside them, log a decision, cost a process, find automation opportunities, audit the map.",
   "author": {
     "name": "Brian Ragone",
     "url": "https://puzzleapp.io"

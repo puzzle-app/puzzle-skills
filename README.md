@@ -1,6 +1,6 @@
 # Puzzle skills
 
-**Twelve skills that make an MCP-connected agent competent in a [Puzzle](https://puzzleapp.io) workspace. Start in the right place, read the map, build a process, interview for one, map the team, map tools and data, map the assets inside them, log a decision, cost a process, find what to automate, audit what's there, share it with the people who need it.**
+**Fifteen skills that make an MCP-connected agent competent in a [Puzzle](https://puzzleapp.io) workspace. Start in the right place, read the map, build a process, interview for one, map the team, map tools and data, map the assets inside them, log a decision, cost a process, find what to improve, audit what's there, share it, brief a role, answer what breaks if we change this, and check whether the stack already does it.**
 
 The Puzzle MCP gives an agent the tools: list, create, update, link, across the four canvases and the changelog. It does not give the agent the method. Connect Claude to a workspace with nothing else and the first map it builds has steps with no executor, a fork with a branch that goes nowhere, a role with no hourly rate so the cost sidebar reads zero, and arrows entering steps from the wrong side. I know because I watched it happen, then wrote down every correction.
 
@@ -8,9 +8,9 @@ These skills are those corrections, split by what the map can do rather than by 
 
 They are plain `SKILL.md` files in the open Agent Skills format. Claude Code, Cowork, claude.ai and Claude Desktop read them as is. Any other agent that can read a markdown file and call the Puzzle MCP can use them too.
 
-**[The twelve skills](#the-twelve-skills)** · [Install](#install) · [Where to start](#where-to-start-by-role) · [How they fit together](#how-they-fit-together) · [What they never do](#what-they-never-do)
+**[The fifteen skills](#the-fifteen-skills)** · [Install](#install) · [Where to start](#where-to-start-by-role) · [How they fit together](#how-they-fit-together) · [What they never do](#what-they-never-do)
 
-## The twelve skills
+## The fifteen skills
 
 | Skill | What the agent can do once it has it | Writes? |
 |---|---|---|
@@ -23,7 +23,10 @@ They are plain `SKILL.md` files in the open Agent Skills format. Claude Code, Co
 | [map-tool-assets](skills/map-tool-assets/SKILL.md) | What lives inside the tools: boards, templates, reports, automations, videos, help articles, pulled through your connected MCP connectors, proposed, created with their URLs and linked to the steps that use them. | Yes |
 | [log-a-decision](skills/log-a-decision/SKILL.md) | A changelog entry with the rationale, the trade-offs, the specs, the owner, the status, and links to the steps and tools it touches. | Yes |
 | [cost-a-process](skills/cost-a-process/SKILL.md) | Labor and allocated tool cost per step, section and tab; the net, hours returned and payback against a future state. Every figure traces to the map; nothing is estimated. | No |
-| [find-automation-opportunities](skills/find-automation-opportunities/SKILL.md) | Every step that could be automated, handed to an agent or AI-assisted, grouped and ranked, with prerequisites and phases. | No |
+| [find-automation-opportunities](skills/find-automation-opportunities/SKILL.md) | Every improvement the map shows: steps to automate or hand to an agent, and the bottlenecks, waits, hand-backs, ownership gaps and double entry that slow a process. Tiered critical, high impact, quick win; grouped and ranked, with prerequisites and phases. | Only if asked to annotate |
+| [change-impact](skills/change-impact/SKILL.md) | What breaks if we replace or remove a tool, a role, a record. Every dependent step, attribute, asset, person and shared view, tiered breaks / needs update / low risk; with a replacement named, its capability gaps and the switch sequence. | After approval |
+| [evaluate-the-stack](skills/evaluate-the-stack/SKILL.md) | Do we already have something that does this. Three layers (tools and costs, data models, Live steps), verdict first: covered, partially, gap. Flags overlap and paid-but-unused. | No |
+| [brief-a-role](skills/brief-a-role/SKILL.md) | The brief for one role, in "you" voice: what you own, each process you touch with your steps in order, what runs around you, the friction, who to ask. For a new hire, a handover, a cover. | No |
 | [share-the-map](skills/share-the-map/SKILL.md) | A public shared view for an audience: the sections, the teams whose roles own them, the tool groups they use, people only when the audience should see names. Asks who it's for, extends an existing view, warns about draft work, logs it. Runs on a yes to the offer at the end of a build. | Yes, after approval |
 | [audit-the-map](skills/audit-the-map/SKILL.md) | Every gap between the map and a complete, current picture, scored and ranked, with the fixes proposed and applied one approved batch at a time. | After approval |
 
@@ -60,8 +63,8 @@ The skills don't change by role. The reading order does.
 | You are | Start with | Then | When you need it |
 |---|---|---|---|
 | **A solo operator** mapping your own business | start-here, then interview-for-a-process (on yourself) | map-tools-and-data, map-the-team (your hats are roles), build-puzzle-process | cost-a-process to see what your time goes to, find-automation-opportunities to get it back |
-| **An ops lead** mapping a department | start-here, map-the-team | interview-for-a-process per teammate, build-puzzle-process per process, share-the-map to the team that runs it, log-a-decision every time something changes | audit-the-map before a review, cost-a-process for the budget conversation |
-| **An IT or transformation lead** | start-here, map-tools-and-data, map-tool-assets | read-the-map (the tool impact question), audit-the-map, log-a-decision for every system change | find-automation-opportunities for the roadmap, cost-a-process for the case |
+| **An ops lead** mapping a department | start-here, map-the-team | interview-for-a-process per teammate, build-puzzle-process per process, share-the-map to the team that runs it, log-a-decision every time something changes | audit-the-map before a review, cost-a-process for the budget conversation, brief-a-role for every new seat |
+| **An IT or transformation lead** | start-here, map-tools-and-data, map-tool-assets | change-impact before every system change, evaluate-the-stack before every purchase, log-a-decision after both | audit-the-map, find-automation-opportunities for the roadmap, cost-a-process for the case |
 | **A consultant** mapping a client | start-here on the client workspace, then interview-for-a-process | map-tools-and-data, map-tool-assets and map-the-team as the interviews surface them, build-puzzle-process on a Current State tab, share-the-map per client team, log-a-decision for every decision | find-automation-opportunities and cost-a-process for the proposal; build-puzzle-process again on a Future State tab |
 | **An agent builder** | start-here, read-the-map | map-tools-and-data and map-tool-assets (the data and the things your agent reads and writes), log-a-decision when an agent takes over a step | audit-the-map to keep the map your agent runs on close to reality |
 
@@ -81,6 +84,7 @@ log-a-decision              why it looks the way it does
 share-the-map               who gets to see it
         ↓
 cost-a-process ← find-automation-opportunities     what it costs, what to change, what that returns
+change-impact · evaluate-the-stack · brief-a-role   what breaks if we change it, do we already have it, how a role reads it
         ↓
 audit-the-map               what drifted, fixed in approved batches
 
@@ -106,7 +110,7 @@ skills/<name>/SKILL.md      one folder per skill; add your own alongside
 scripts/package.sh          zips each skill into dist/<name>.skill for upload
 ```
 
-Fork it, keep the twelve, add the skills your operation needs: a client's naming conventions, a regulated approval path, a house style for notes. Skills that are specific to one business belong in that business's fork, not here.
+Fork it, keep the fifteen, add the skills your operation needs: a client's naming conventions, a regulated approval path, a house style for notes. Skills that are specific to one business belong in that business's fork, not here.
 
 ## Related
 
@@ -115,6 +119,7 @@ Fork it, keep the twelve, add the skills your operation needs: a client's naming
 
 ## Versions
 
+- **v1.6** (2026-10-23): three skills from the Circle AI skills library, generalized: brief-a-role, change-impact, evaluate-the-stack. build-puzzle-process reads a tool's configuration as a source (pipelines as steps, automations as drops). find-automation-opportunities now finds bottlenecks, waits, hand-backs, ownership gaps and double entry, tiers everything, and annotates steps only when asked.
 - **v1.5** (2026-10-23): start-here rounds out a workspace Puzzle's onboarding has already seeded, in five approved stages, then rounds out the first map; every write skill ends its proposal with the same push plan block. The standalone build-puzzle-process repo is archived.
 - **v1.4** (2026-10-22): share-the-map, and a one-line offer to share at the end of every build.
 - **v1.3** (2026-10-22): build-puzzle-process now builds from a transcript, notes or a document with stated and inferred steps kept apart and confirmed in the intake round; the one-section rule becomes as few sections as possible, 10 to 25 steps each; map-tools-and-data creates tool groups only past twelve tools.
