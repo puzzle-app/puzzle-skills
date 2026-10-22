@@ -1,6 +1,6 @@
 ---
 name: build-puzzle-process
-description: Build thorough, well-structured processes in any Puzzle workspace via the Puzzle MCP. Load whenever the user asks to "build out this process", "map this in Puzzle", "document this workflow", "create a process for X", or when a workflow needs to become a Puzzle section with steps, executors, roles, tools, conditionals, attributes and notes. Also load when editing or extending an existing Puzzle process. Covers one consolidated intake, one section per process, conditional branches and go-to steps, orientation chosen by shape, a grid sketch traced for zero crossings, one right-to-left connector default with three exceptions, a handle table, a two-call handle pass, go-to steps for anything that would cross, a visual check of the built map, step typing and titling, RACI roles with hourly rates, costing inputs, attributes, tools, triggers, delay steps and a changelog entry. When in doubt building anything in Puzzle, use this skill.
+description: Build thorough processes in any Puzzle workspace via the Puzzle MCP. Load whenever the user asks to "build out this process", "map this in Puzzle", "document this workflow", "create a process for X", "turn this transcript into a map", or when a workflow needs to become a Puzzle section with steps, executors, roles, tools, conditionals, attributes and notes. Also load when editing or extending an existing Puzzle process. Covers one consolidated intake, as few sections as possible (10 to 25 steps each), conditional branches and go-to steps, orientation chosen by shape, a grid sketch traced for zero crossings, one right-to-left connector default with three exceptions, a handle table, a two-call handle pass, go-to steps for anything that would cross, a visual check of the built map, step typing and titling, RACI roles with hourly rates, costing inputs, attributes, tools, triggers, delay steps and a changelog entry. When in doubt building anything in Puzzle, use this skill.
 ---
 
 # Build a Puzzle Process
@@ -23,7 +23,7 @@ Two rules govern everything else:
 5. **Trace each conditional.** One line per diamond: which outcome continues on the row, which goes above, which goes below, which becomes a go-to (see "The conditional trace"). That line sets the `steps` array order and marks the few connections that are not the default. For three or more conditionals, or any branch that crosses another, also draw the grid sketch. The acceptance bar is **zero crossings and zero connectors passing through a step**; anything that would still cross becomes a `go_to` step.
 6. **Propose the full process in chat.** Every step fully specified: name, type, status, executor, roles, tools, attributes, frequency, duration, and a one-line note — plus the orientation (with the reason), the branch wiring, the **conditional trace** (and the grid sketch when required), and the **handle table** (see "Connectors"): one row per connection with its rule (D, A, B, C, or go-to), label, source handle, and target handle. Let the user evaluate the structure and the layout before anything is written to Puzzle.
 7. **Create missing canvas objects first.** New roles (with hourly rates) on the Team Canvas, new tools on the Tools Canvas, new entities/attributes in the data model. These must exist before the workflow build so IDs are available for linking.
-8. **Build in one call.** Use `create_process` with the full `sections`, `steps`, and `connections` arrays in a single call, wiring connections via `temp_id` references, with `label` set inline on every connection that needs one. Include `role_ids`, `tool_ids`, `duration`, `frequency`, `status`, `executor`, `type`, and `notes` directly on each step. Set `direction`. Capture the returned step IDs. (Connections in `create_process` carry only `from`, `to`, and `label` — handles come next.)
+8. **Build in one call.** Use `create_process` with the full `sections` (one, or the stage sections the proposal approved), `steps`, and `connections` arrays in a single call, wiring connections via `temp_id` references, with `label` set inline on every connection that needs one. Include `role_ids`, `tool_ids`, `duration`, `frequency`, `status`, `executor`, `type`, and `notes` directly on each step. Set `direction`. Capture the returned step IDs. (Connections in `create_process` carry only `from`, `to`, and `label` — handles come next.)
 9. **Run the handle pass, two calls.** `list_steps` on the new section with `include: ["connections", "connections.connection_id", "connections.to_step_id", "connections.to_step_name", "connections.label"]` to capture every connection ID. Call one sets the default on **every** connection (`right → left` in LTR, `bottom → top` in TTB), no exceptions, in batches of 25. Call two sets only the rows the handle table marks A, B or C. Same turn as the build. A connection that misses call one keeps Puzzle's nearest-side default, and a map with nearest-side handles is not built.
 10. **Look at the map.** Screenshot the section (built-in browser, then Claude in Chrome, then computer use on the desktop, then ask the user; see "The visual check") and trace every connector. Fix any crossing, pass-through, or hook via `update_workflow` or a go-to step, then screenshot again. The handle table is a prediction of the layout; the screenshot is the proof. If no screenshot is possible, the changelog entry says the layout is unverified.
 11. **Link what create_process can't carry.** Attributes always link post-build via `link_to_steps` with `type: attribute`. Approver, consulted, and informed roles also link post-build via `link_to_steps` with `type: role` and the right `involvement` (the `role_ids` array in `create_process` covers responsible only). Verify roles and tools landed; patch any misses with `link_to_steps`.
@@ -50,7 +50,8 @@ Per step:
 
 Per process:
 
-- One section
+- As few sections as possible: one up to about 25 steps; beyond that, stages of 10 to 25 steps cut at natural seams, named as stages of one process, connected across the boundary
+- When the source is a transcript or a document: stated and inferred steps kept apart, and the inferred ones confirmed in the intake round
 - Trigger known (ask if not stated) — the first step of the map is what kicks the process off
 - Orientation chosen by shape (LTR timeline / TTB pipeline / LTR hybrid with drops) and stated with a reason
 - Named people mapped to roles (ask if a person's role is unknown)
@@ -85,9 +86,25 @@ Do the legwork before asking: research rates, draft the attribute model, estimat
 
 ---
 
-## One section per process — always
+## As few sections as possible
 
-A process lives in **one section**. Do not split a single process across multiple sections. Left unattended, AI builders get "section-happy" and fragment one process into several, which breaks the visual story and the costing rollup. One section, every step inside it. This is non-negotiable unless the user explicitly asks for multiple.
+A section is a stage of a process the eye can take in at once. The proxy is **10 to 25 steps per section**.
+
+- A process of up to about 25 steps is **one section**. Do not split it. Left unattended, AI builders get "section-happy" and fragment one process into several, which breaks the visual story and the costing rollup.
+- A process beyond that splits at its natural seams, each section 10 to 25 steps: a handoff between teams, a gate or sign-off, a change of owner, a wait of days. Name the sections as stages of one process ("Provider onboarding: Stage 2, First meeting") so they read as a sequence. A conditional and all its outcomes stay in one section; never cut a fork across a boundary.
+- Connect the stages: the last step of one section connects to the first step of the next with the default handle pair, so the flow reads across the boundary.
+- A section under 10 steps exists only when the whole process is that short.
+- The split is part of the proposal in chat, with the seam named for each cut. The user approves it before anything is built.
+
+## When the source is a transcript, notes, or a document
+
+A call transcript, meeting notes, an old SOP, a screen recording's transcript, a long thread. The skill runs the same way, with one extra discipline: keep what the source says apart from what you inferred.
+
+1. **Extract, don't invent.** Pull every trigger, step, owner, tool, decision, wait, exception and number the source states, noting the speaker where it helps. A step the source describes is *stated*. A step you added so the flow connects is *inferred*, and the draft marks it so.
+2. **Resolve what the source leaves open** in the single intake round: the trigger; which outcome of each decision is the normal one; who owns a step, as a role rather than the speaker's name; the tool when someone says "the system"; durations and frequencies; whether a mentioned wait is routine. The round reads as "here is what I heard, confirm or correct", with the inferred items flagged.
+3. **Ask the three things a transcript never says.** What happens before the part they described (the trigger). What happens when it goes wrong (the exceptions). What has changed since the conversation (the status). If the conversation hasn't happened yet, `interview-for-a-process` prepares it.
+4. **Propose before building, as always**, with stated and inferred steps shown distinctly. The user's approval is what turns an inferred step into a stated one.
+5. **Name the source in the changelog entry**: the call and its date, or the document, and which steps were inferred and then confirmed, so a later reader knows where each step came from.
 
 ---
 
@@ -468,7 +485,7 @@ Before you call it done, confirm every step has:
 
 And the process as a whole:
 
-- [ ] One section, all steps inside
+- [ ] As few sections as possible: one up to about 25 steps; stages of 10 to 25 beyond that, cut at seams, connected across the boundary
 - [ ] Trigger asked about (if unstated) — the first step is what kicks the process off
 - [ ] Orientation chosen by shape (LTR timeline / TTB pipeline / LTR hybrid with drops) and stated with a reason
 - [ ] Every conditional traced: continue on the row, branch above, terminator or skip below, go-to where it would cross; at most three outcomes, all labeled

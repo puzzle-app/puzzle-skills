@@ -1,6 +1,6 @@
 ---
 name: map-tools-and-data
-description: Build or extend the Tools canvas and the data model of a Puzzle workspace through the Puzzle MCP: the tools the operation runs on with their costs and status, tool groups, the entities and attributes each tool holds, and the links from attributes to the steps that read or write them; hands bulk asset discovery to map-tool-assets. Load when the user asks to "map our tools", "add our tech stack", "add tool costs", "set up the data model", "which fields does this step touch", "map our templates and reports", "add our Zaps and automations", or when a process build names a tool, record or field that doesn't exist yet. One intake round, propose before writing, link to steps, changelog at the end.
+description: Build or extend the Tools canvas and the data model of a Puzzle workspace through the Puzzle MCP: the tools the operation runs on with their costs and status, as few tool groups as possible, the entities and attributes each tool holds, and the links from attributes to the steps that read or write them; hands bulk asset discovery to map-tool-assets. Load when the user asks to "map our tools", "add our tech stack", "add tool costs", "set up the data model", "which fields does this step touch", "map our templates and reports", "add our Zaps and automations", or when a process build names a tool, record or field that doesn't exist yet. One intake round, propose before writing, link to steps, changelog at the end.
 ---
 
 # Map tools and data
@@ -26,11 +26,15 @@ Load `read-the-map` first. The `tool_id` versus `account_tool_id` distinction ma
 
 Existing objects get extended or updated, never recreated.
 
+## Groups: as few as possible
+
+The Tools canvas starts flat. Create groups only when more than **12 tools** would otherwise sit together on a tab. Then group by function (Sales, Finance, Delivery, Internal) in as few groups as hold each one under 12. Never a group of one or two tools, and never regroup a canvas the user has already organised; add to the groups that exist.
+
 ## The single intake round
 
 Draft everything from the user's material (a tool list, a subscription export, a process description, screenshots of a CRM, a connected tool you can enumerate), then ask once:
 
-- **Tools**: which systems, grouped how. For each tool not in the catalogue, say so; the user can pick the closest catalogue entry or ask Puzzle to add it.
+- **Tools**: which systems, and whether the count calls for groups (see Groups). For each tool not in the catalogue, say so; the user can pick the closest catalogue entry or ask Puzzle to add it.
 - **Status and cost**: Active, Considering or Cancelled; the charges (seats × price per month, a flat fee, usage, a one-time fee) and renewal dates where known. Offer the public list price as a starting point, marked as such.
 - **Entities and attributes**: per tool, the records the mapped steps touch and the fields on each. Propose a sensible set per record (a Contact has name, email, phone, company, owner, stage) with field types from the allowed list, and let the user cut it down. Only model fields a step reads or writes.
 - **Assets**: the few templates, boards or reports the user names, each with its URL. For a full pass through connected tools, point them at `map-tool-assets` after this build.
@@ -50,7 +54,7 @@ Need from you: ...
 
 ## Build
 
-1. **Tools and groups.** `create_tool_structure` with `tool_groups` (new groups with nested `tools` by catalogue `tool_id`, or `tool_group_id` to add to an existing group) and `standalone_tools`. Status and notes go on each tool. Capture the returned `account_tool_id`s, or read them back with `list_tools` scope `workspace`.
+1. **Tools and groups.** `create_tool_structure` with `standalone_tools` by default, and `tool_groups` (new groups with nested `tools` by catalogue `tool_id`, or `tool_group_id` to add to an existing group) only when the Groups rule calls for them. Status and notes go on each tool. Capture the returned `account_tool_id`s, or read them back with `list_tools` scope `workspace`.
 2. **Costs and status on existing tools.** `update_account_tools` with `cost_items`. The array replaces the tool's whole set: read the current set with `include: ["cost_items"]` first and pass back every row you want to keep, with its `id`. Move a tool into a group with `tool_group_id`.
 3. **Entities and attributes.** `create_data_model` with `account_tool_id` (or `tool_id` for a catalogue tool not yet in the workspace) and `entities`, each with nested `attributes` (`name`, `field_type`, `api_name`, `description`). Fields for an existing entity go in `standalone_attributes` with `entity_id`. Capture attribute ids.
 4. **Assets.** A handful of assets the user names go in here: `create_assets` with `account_tool_id` (or `tool_id`), `name`, `type`, `url`, `description`, `status`, and `step_ids`. For anything more, and for discovering what lives inside connected tools, run `map-tool-assets`; it owns the type mapping, the connector crawl and the matching to steps.
