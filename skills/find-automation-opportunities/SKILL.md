@@ -23,6 +23,7 @@ Load `read-the-map` first. Use `cost-a-process` for any dollar figure.
 3. `list_attributes` with `include: ["steps.step_id", "steps.kind", "entity_name", "tool_name", "field_type"]` to see which steps move structured data between systems.
 4. `list_tools` scope `workspace` with `include: ["status", "notes"]` for what is already in the stack, and which of it has an API or an automation connector.
 5. `list_changelog_entries` with `query` on words like "automate", "agent", "integration", "Zapier", "Make", "n8n" to find what was already decided.
+6. `list_tag_groups` with `include: ["description", "tags.id", "tags.name"]`, in case the team already tags steps by priority, friction or project; findings reuse those groups.
 
 ## Read the friction, not only the automation candidates
 
@@ -113,7 +114,7 @@ Risk: <one line>
 
 ## Annotating the map (opt in)
 
-The user can ask for the findings written onto the steps they concern: one line at the top of the step's note ("Opportunity: <name>, <tier>, <date>"), through `update_workflow`, proposed as a push plan and pushed only on approval. Never annotate without being asked; a map covered in flags is a worse map.
+The user can ask for the findings written onto the steps they concern: one line at the top of the step's note ("Opportunity: <name>, <tier>, <date>"), through `update_workflow`, proposed as a push plan and pushed only on approval. Or, where the workspace has tags, as tags a filter can find later. Reuse a group the team already keeps for priority or friction. Otherwise propose one group, "Opportunity", with one tag per tier: Critical (red), High impact (amber), Quick win (green), and a second, "Friction", only if the user wants the friction findings kept (Bottleneck, Double entry, Hand-back, Wait). Groups, tags and step links go in the push plan; `create_tags` with `step_ids` writes them, as in the Tags section of `build-puzzle-process`. Never annotate without being asked; a map covered in flags is a worse map.
 
 ## From roadmap to map
 

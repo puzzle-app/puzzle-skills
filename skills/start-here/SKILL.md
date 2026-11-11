@@ -32,6 +32,7 @@ Read the onboarding changelog entry first (`list_changelog_entries` with `query:
 | People | `list_people`, `include: ["role_count", "person_type", "tools"]` | people; holding a role; with tool access |
 | Workflows | `list_tabs` canvas `workflows`; `list_sections` per tab, `include: ["step_count"]`; for the first map, `list_steps` with `include: ["executor", "duration", "frequency", "roles.role_id", "tools.tool_id"]` | tabs; sections; steps; on the first map, steps missing executor, role, cost inputs or tool |
 | Record | `list_changelog_entries`, `include: ["status"]`; `list_shared_views` | entries by status; shared views |
+| Tags | `list_tag_groups`, `include: ["tag_count"]`; `list_tags`, `include: ["step_count"]` | groups; tags; tags on any step (none is not a gap) |
 
 Page through; `meta.total` is the count. A canvas is **as onboarding left it** when it has objects but the depth fields are empty, **in use** when most depth fields are filled, **empty** at zero.
 
@@ -42,6 +43,7 @@ Page through; `meta.total` is the count. A canvas is **as onboarding left it** w
 Onboarding (2026-10-20): 14 tools from the gallery, 3 teams and 9 roles from the org chart, 6 people, 1 process Nova built (38 steps)
 Tools: 14, 0 with costs, 0 groups · Data: 0 entities · Assets: 0
 Team: 9 roles, 0 with rates, 4 with people, 2 reporting lines · People: 6, 4 in roles, 0 with tool access
+Tags: 1 group, 4 tags, on 1 step
 First map "Client onboarding": 38 steps, 31 without executor, 38 without cost inputs, 0 attributes, 12 without a tool
 
 ## Round-out path

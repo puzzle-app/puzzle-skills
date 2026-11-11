@@ -17,7 +17,7 @@ Two rules govern everything else:
 ## The build order (do not skip steps)
 
 1. **Orient before you touch anything.** Call `list_tabs` to confirm the tab ID. Then `list_sections` (with `tab_id` and `include: ['step_count']`) to check for an existing section so you don't duplicate or fragment. If editing an existing process, `list_steps` to capture current step IDs and connection IDs before changing anything.
-2. **Resolve roles, tools, and data up front.** Roles come from `list_teams` with `include: ['roles.id', 'roles.name', 'roles.hourly_rate']`. Tools come from `list_tools` — query a single comma-separated string of every tool name at once (e.g. `"Attio, QuickBooks, Intercom, monday.com, Claude"`) rather than one call per tool. Check `list_entities` and `list_attributes` for the data objects the process touches. This is how you discover what's missing before you ask about it.
+2. **Resolve roles, tools, and data up front.** Roles come from `list_teams` with `include: ['roles.id', 'roles.name', 'roles.hourly_rate']`. Tools come from `list_tools` — query a single comma-separated string of every tool name at once (e.g. `"Attio, QuickBooks, Intercom, monday.com, Claude"`) rather than one call per tool. Check `list_entities` and `list_attributes` for the data objects the process touches, and `list_tag_groups` with `include: ["tags.id", "tags.name"]` for the tags the workspace already uses. This is how you discover what's missing before you ask about it.
 3. **Draft the full process privately.** Work through every step, branch, and input against the Completeness Checklist below. Every gap you find becomes an intake question.
 4. **Run the single intake round.** One consolidated set of questions covering every missing input (see "The single intake round"). Do the research first (e.g. hourly rates, proposed attributes) so most questions are confirm/adjust rather than open-ended.
 5. **Trace each conditional.** One line per diamond: which outcome continues on the row, which goes above, which goes below, which becomes a go-to (see "The conditional trace"). That line sets the `steps` array order and marks the few connections that are not the default. For three or more conditionals, or any branch that crosses another, also draw the grid sketch. The acceptance bar is **zero crossings and zero connectors passing through a step**; anything that would still cross becomes a `go_to` step.
@@ -26,8 +26,8 @@ Two rules govern everything else:
 8. **Build in one call.** Use `create_process` with the full `sections` (one, or the stage sections the proposal approved), `steps`, and `connections` arrays in a single call, wiring connections via `temp_id` references, with `label` set inline on every connection that needs one. Include `role_ids`, `tool_ids`, `duration`, `frequency`, `status`, `executor`, `type`, and `notes` directly on each step. Set `direction`. Capture the returned step IDs. (Connections in `create_process` carry only `from`, `to`, and `label` — handles come next.)
 9. **Run the handle pass, two calls.** `list_steps` on the new section with `include: ["connections", "connections.connection_id", "connections.to_step_id", "connections.to_step_name", "connections.label"]` to capture every connection ID. Call one sets the default on **every** connection (`right → left` in LTR, `bottom → top` in TTB), no exceptions, in batches of 25. Call two sets only the rows the handle table marks A, B or C. Same turn as the build. A connection that misses call one keeps Puzzle's nearest-side default, and a map with nearest-side handles is not built.
 10. **Look at the map.** When a reference image sets the layout, first place the steps by hand (see "Match a reference image"). Screenshot the section (built-in browser, then Claude in Chrome, then computer use on the desktop, then ask the user; see "The visual check") and trace every connector. Fix any crossing, pass-through, or hook via `update_workflow` or a go-to step, then screenshot again. The handle table is a prediction of the layout; the screenshot is the proof. If no screenshot is possible, the changelog entry says the layout is unverified.
-11. **Link what create_process can't carry.** Attributes always link post-build via `link_to_steps` with `type: attribute`. Approver, consulted, and informed roles also link post-build via `link_to_steps` with `type: role` and the right `involvement` (the `role_ids` array in `create_process` covers responsible only). Verify roles and tools landed; patch any misses with `link_to_steps`.
-12. **Verify.** Re-run `list_steps` with includes for roles, tools, attributes, duration, frequency, notes, and connections. Confirm every connection in the handle table received a successful update (the API does not read handles back, so your record of the pass is the verification). Fix any label or handle that reads wrong via `update_workflow`.
+11. **Link what create_process can't carry.** Attributes always link post-build via `link_to_steps` with `type: attribute`. Approver, consulted, and informed roles also link post-build via `link_to_steps` with `type: role` and the right `involvement` (the `role_ids` array in `create_process` covers responsible only). Tags too: `link_to_steps` with `type: tag` and each `tag_id`. Verify roles and tools landed; patch any misses with `link_to_steps`.
+12. **Verify.** Re-run `list_steps` with includes for roles, tools, attributes, tags, duration, frequency, notes, and connections. Confirm every connection in the handle table received a successful update (the API does not read handles back, so your record of the pass is the verification). Fix any label or handle that reads wrong via `update_workflow`.
 13. **Memorialize in the changelog.** Always, including the handle table and the result of the visual check. See "Changelog" below.
 14. **Offer to share, in one line.** The closing message ends with an offer: a shared view with this section, the team that owns it and the tools it uses. It is an offer, not a question before the build. On a yes, `share-the-map` takes over.
 
@@ -47,6 +47,7 @@ Per step:
 - Tool(s) the step touches
 - Attributes: the fields read or written in that tool at that step
 - Cost inputs on manual steps: duration in minutes + frequency per month
+- Tags, when the workspace uses them: the existing tags that apply (none is a fine answer)
 - A mini-SOP note
 
 Per process:
@@ -81,6 +82,7 @@ After orienting and drafting, gather **everything** missing in one consolidated 
 - **RACI** — present the inferred approver / consulted / informed assignments (from hierarchy and surrounding-step ownership) as a compact table for confirmation, alongside the responsible roles.
 - **People** — for any actual person named in the prompt ("then Sarah reviews it"): ask what role that person holds if it isn't stated and can't be resolved from the People Canvas. Steps are owned by roles, so every named person must map to a role.
 - **Attributes** — for steps whose tools have no matching entities/attributes: present a proposed entity + attribute list per step for approval before adding to the data model.
+- **Tags** — when the workspace has tag groups, the existing tags proposed per step for confirmation (see "Tags").
 - **Branch logic** — any fork where the prompt is ambiguous about whether the paths rejoin, loop back, or diverge for good.
 
 Do the legwork before asking: research rates, draft the attribute model, estimate durations. The intake should read as "confirm or correct this," not "tell me everything." One round. If an answer creates one genuinely unforeseeable follow-up, fold it into the proposal review rather than opening a second interrogation.
@@ -481,6 +483,17 @@ Link every tool a step touches — via `tool_ids` (and `primary_tool_id`) on the
 
 ---
 
+## Tags
+
+A tag marks what the map has no field for: a cadence, a program or project the step belongs to, a priority, a compliance flag. Tags are workspace-wide, each in a group, so one tag can pull steps from every process into one filter.
+
+- **Reuse first.** Propose tags from the set `list_tag_groups` returned in step 2. A near-duplicate ("Weekly" beside "Weekly cadence") splits the filter in two. A workspace without groups gets no tags unless the user asks for them.
+- **New tags only on request or approval**, in the intake round: the tag, its group, a color (crimson, red, amber, green, teal, blue, purple, gray) and an emoji if wanted. It goes in an existing group when it belongs there; a new group gets a description saying what it sorts steps by. Create with `create_tags`: `groups` with nested `tags` and their `step_ids`, or `tags` with `tag_group_id` to add to a group.
+- **When a requested tag duplicates a relationship the map already holds**, offer that instead. Who does a step is its roles and the people in them; where it happens is its tools; how it runs is its executor and status. Those drive the filters, the cost and the charts a tag can't. Make the tag if the user still wants it.
+- **Link after the build.** `create_process` carries no tags: `link_to_steps` with `type: tag` and `tag_id`, one entry per step and tag (re-tagging is a no-op). Remove one with `unlink_from_steps`, `type: step_tag`, and the `tags.step_tag_id` from `list_steps`. `update_tags` renames, recolors, changes the emoji, or moves a tag to another group with `tag_group_id`.
+
+---
+
 ## Mini-SOP notes
 
 Every step gets a note written so anyone reading the map knows exactly how the step is configured and why. Use a consistent four-part structure:
@@ -509,7 +522,7 @@ Set step `status` deliberately: **Live** for steps running in production today; 
 When the process is built (or meaningfully changed), record it. Always. Use `create_changelog_entries` with a Markdown body (title as the first heading) that captures:
 
 - What the user asked for, in substance (the process, the decisions made in intake: orientation and why, rates, attributes, branch logic)
-- What was created or changed, across **all** elements: section and steps, connections and labels, the handle table as applied, what the visual check found and fixed, whether the layout was set by hand to match a reference image (and which steps sit in which row), roles created (with rates), tools added, entities/attributes created and linked, cost inputs set
+- What was created or changed, across **all** elements: section and steps, connections and labels, the handle table as applied, what the visual check found and fixed, whether the layout was set by hand to match a reference image (and which steps sit in which row), roles created (with rates), tools added, entities/attributes created and linked, tags linked (and any created), cost inputs set
 - Why — the rationale behind any judgment calls
 
 Set `status: completed`, set the owner (`person_id` from `list_people`), then use `update_changelog_entries` to associate the relevant steps and tools so the entry is wired into the map. A build without a changelog entry is an incomplete build.
@@ -535,6 +548,7 @@ Before you call it done, confirm every step has:
 - [ ] Tools linked on every step that touches one
 - [ ] Attributes linked on every step that reads or writes data
 - [ ] Duration + frequency on every Person step (costing)
+- [ ] Tags the intake approved, from the existing set, linked
 - [ ] A mini-SOP note (Purpose / Inputs / Procedure / Output)
 
 And the process as a whole:
@@ -576,7 +590,7 @@ And the process as a whole:
 - Step positions are computed by Graphviz from the connection graph and `direction`. There is no position field to set; shape the graph (see "Shaping the graph") and let the layout follow. The only way to set a position is to drag the step on the canvas, which this skill does only to match a reference image.
 - Handles are set **only** via `update_workflow` on existing connection IDs (`connections` array: `id`, `source_handle`, `target_handle`; `from_step_id`, `to_step_id`, and `label` are also accepted for rewiring). Get the IDs from `list_steps` with `include: ["connections", "connections.connection_id", "connections.to_step_id", "connections.to_step_name", "connections.label"]`. `list_steps` does not return handles, so keep your handle table as the source of truth.
 - `create_connections` (for patching an existing map) likewise accepts only `from_step_id`, `to_step_id`, `label` — follow it with the same handle pass.
-- Steps in `create_process` carry `role_ids`, `tool_ids`, `primary_tool_id`, `duration`, `frequency`, `status`, `executor`, `type`, and `notes` directly — front-load everything the schema allows. Attributes are the exception: always a post-build `link_to_steps` pass.
+- Steps in `create_process` carry `role_ids`, `tool_ids`, `primary_tool_id`, `duration`, `frequency`, `status`, `executor`, `type`, and `notes` directly — front-load everything the schema allows. Attributes and tags are the exceptions: always a post-build `link_to_steps` pass.
 - To rewire an existing arrow without deleting it: `list_steps` with connection includes to get the connection ID, then `update_workflow` with a `connections` array (`id`, `from_step_id`, `to_step_id`, `source_handle`, `target_handle`, `label`) to redirect in place.
 - Capture returned step IDs immediately — every later `update_workflow`, `link_to_steps`, and changelog association needs them.
 - `update_workflow` takes max 25 steps per call — batch accordingly on big processes, and split large `connections` arrays the same way.

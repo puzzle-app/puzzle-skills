@@ -36,6 +36,7 @@ Pull everything the checks need, in as few calls as the scope allows:
 10. `list_tasks` with `completed: false` and `include: ["step_name", "section_name"]`.
 11. `list_changelog_entries` with `include: ["status", "associated_steps.step_id", "associated_tools.account_tool_id"]`.
 12. `list_shared_views` with `include: ["items.type", "items.id", "items.name"]`.
+13. `list_tags` with `include: ["tag_group_name", "step_count"]`, when the workspace has tag groups.
 
 Save the raw results if the workspace is large; the checks run over the whole set.
 
@@ -97,6 +98,8 @@ Each check names what it finds, why it matters, and the fix. Severity: **blocks*
 | Changelog entry in_progress or planned with every linked step Live | tidies | Status lags the map | Update the entry status |
 | Outstanding tasks on Live steps | weakens | Work the map says is unfinished | List them for the owner |
 | Shared view containing a section with Draft or Testing steps | weakens | The public sees unfinished work | Remove the section from the view or finish the work |
+| Tag on no step, or a tag group with no tags | tidies | Clutter in every tag picker | Ask whether it is still meant to be used; retiring it is the user's call, in the app |
+| Two tags that differ only in wording ("Weekly", "Weekly cadence") | tidies | One filter split in two | Propose one name and re-tag the other's steps (`link_to_steps` type tag, `unlink_from_steps` type step_tag) |
 
 ## Score and rank
 

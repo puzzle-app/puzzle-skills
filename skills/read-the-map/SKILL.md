@@ -1,6 +1,6 @@
 ---
 name: read-the-map
-description: Read a Puzzle workspace through the Puzzle MCP and answer questions from it. Load first, before any other Puzzle skill, and whenever the user asks what a process does, who owns a step, which steps use a tool, what data a step reads or writes, what something costs, why a decision was made, what is outstanding, or what is shared publicly. Covers the four canvases (Workflow, Team, People, Tools and data model), the changelog, tasks and shared views, the list_* calls and the include fields each answer needs, how to put steps back in flow order from their connections, the tool_id versus account_tool_id trap, and how to answer from the map without inventing anything it does not say.
+description: Read a Puzzle workspace through the Puzzle MCP and answer questions from it. Load first, before any other Puzzle skill, and whenever the user asks what a process does, who owns a step, which steps use a tool or carry a tag, what data a step reads or writes, what something costs, why a decision was made, what is outstanding, or what is shared publicly. Covers the four canvases (Workflow, Team, People, Tools and data model), the changelog, tasks and shared views, the list_* calls and the include fields each answer needs, how to put steps back in flow order from their connections, the tool_id versus account_tool_id trap, and how to answer from the map without inventing anything it does not say.
 ---
 
 # Read the map
@@ -23,6 +23,7 @@ Four canvases, a changelog, tasks and shared views. Everything links to everythi
 | Entity and attribute | Tools (data model) | The records a tool holds (Contact, Deal, Ticket) and their fields. Attributes link to the steps that read or write them, as trigger, input or output. |
 | Asset | Tools | A template, report, document, video or snippet kept inside a tool, with a URL, linked to the steps that use it. |
 | Task | Workflow | A checklist item on a step or section, outstanding or completed. |
+| Tag and tag group | Workspace settings | A label on steps from a workspace-wide set. Every tag sits in a group (a group "Cadence" holding Daily, Weekly, Monthly) and has a name, a color and an optional emoji. One tag can mark steps in every section, so tags answer questions that cut across processes. An Optimizer plan feature: a workspace can have none. |
 | Changelog entry | Changelog | A decision or change: body with the rationale, owner, status (idea, planned, in_progress, completed, archived), linked steps and tools. |
 | Shared view | Workspace | A public, curated subset of the map: selected sections, teams, tool groups, people tabs or people. |
 
@@ -53,9 +54,11 @@ Resolve several tools in one call with a comma-separated query: `"Attio, QuickBo
 
 **What processes exist, and where.** `list_tabs` with canvas `workflows`, then `list_sections` per tab with `include: ["step_count", "description"]`. Archived tabs and sections are history unless the user asks about them.
 
-**Walk me through this process.** `list_sections` with `query`, then `list_steps` with `section_id` and `include: ["type", "status", "executor", "notes", "duration", "frequency", "roles.role_name", "roles.involvement", "tools.tool_name", "connections.connection_id", "connections.to_step_id", "connections.to_step_name", "connections.label"]`. Steps come back unordered; put them in flow order (next section). For a `go_to`, `alias` or `subflow` step, add `target` to see where it points.
+**Walk me through this process.** `list_sections` with `query`, then `list_steps` with `section_id` and `include: ["type", "status", "executor", "notes", "duration", "frequency", "roles.role_name", "roles.involvement", "tools.tool_name", "tags.tag_name", "connections.connection_id", "connections.to_step_id", "connections.to_step_name", "connections.label"]`. Steps come back unordered; put them in flow order (next section). For a `go_to`, `alias` or `subflow` step, add `target` to see where it points.
 
 **Who does this, and who signs off.** The roles on the step with `roles.role_name` and `roles.involvement` (responsible, approver, consulted, informed). To find every step a role owns: `list_steps` with `role_id`. To find the humans in a role: `list_roles` with `include: ["people.first", "people.last", "team_name", "hourly_rate"]`. To go from a person to their roles: `list_people` with `include: ["roles.role_name", "team_names"]`.
+
+**What is tagged X, and which tags exist.** `list_tag_groups` with `include: ["description", "tag_count", "tags.id", "tags.name", "tags.color"]` for the set. `list_steps` with `tag_id` for every step carrying a tag, across sections; add `section_name` to the include to group them by process. `list_tags` with `step_id` for the tags on one step, or with `include: ["tag_group_name", "step_count"]` for how much each is used. On any step list, `include: ["tags.tag_name", "tags.tag_group_name"]` adds the tags. No groups back means the workspace doesn't use tags (or its plan doesn't have them), not that something failed.
 
 **What runs on this tool, and what breaks if we change it.** Resolve the tool with `list_tools` scope `workspace`. Then: `list_steps` with `tool_id` (catalogue id) for the steps; `list_entities` and `list_attributes` with `account_tool_id` for the data; `list_assets` with `account_tool_id` for the templates and reports kept in it; `list_people` with `account_tool_id` for who has access. The union is the blast radius of a change to that tool. Report it as steps, records, assets and people, each with counts.
 

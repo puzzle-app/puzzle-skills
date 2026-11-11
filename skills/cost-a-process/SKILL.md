@@ -29,6 +29,7 @@ Automation and AI Agent steps carry no labor cost. Their tool cost (the automati
 4. Tool costs: `list_tools` scope `workspace` with `include: ["cost_items", "status"]`.
 5. Steps per tool, for allocation: from the step list already loaded, or `list_steps` with `tool_id` for each tool when the scope is the whole workspace.
 6. Scenarios already recorded: `list_changelog_entries` with `include: ["body", "status", "associated_steps.step_id"]` for entries that carry a cost scenario; cite them rather than recomputing where they cover the same change.
+7. Tags, when the user asks for cost by tag ("what do our weekly steps cost", "what does the onboarding program cost across teams"): `list_steps` with `tag_id`, with the same includes as step 2.
 
 ## Procedure
 
@@ -37,9 +38,10 @@ Automation and AI Agent steps carry no labor cost. Their tool cost (the automati
 3. Convert each tool's cost items to a monthly figure. Allocate across linked steps by weight. Report unallocated tools.
 4. If a future state exists (a tab, a section, or a proposal from `find-automation-opportunities`), compute it the same way. Steps that became Automation or AI Agent carry no labor; add new tools at the cost the user gave or the quoted list price, marked as such.
 5. Compute the net, hours returned, and payback from one-time costs the user supplies.
-6. Write the report. Every figure cites the steps, the rates and the tool costs behind it.
-7. Propose it in chat. Before any figure goes to someone else, the user confirms it.
-8. Offer to record it: a changelog entry through `log-a-decision` with the cost table in the body (current, future, net), linked to the steps and tools, so the scenario lives on the entry.
+6. Cost by tag, when asked: the same per-step labor and allocated tool figures, summed over the steps carrying the tag, across every section they sit in. A step carrying two of the tags compared counts under each, so the rows do not add up to the total; say so.
+7. Write the report. Every figure cites the steps, the rates and the tool costs behind it.
+8. Propose it in chat. Before any figure goes to someone else, the user confirms it.
+9. Offer to record it: a changelog entry through `log-a-decision` with the cost table in the body (current, future, net), linked to the steps and tools, so the scenario lives on the entry.
 
 ## Output format
 
@@ -61,6 +63,10 @@ One-time costs: <n>. Payback: <n> months.
 | Step | Executor now → future | Role | Min × runs/mo | Rate | Labor now | Labor future |
 |---|---|---|---|---|---|---|
 Tools now: <tool: allocated share>. Tools future: <...>. Net: <n>.
+
+## By tag (when asked)
+| Tag | Steps | Sections | Labor | Tools (allocated) | Total |
+|---|---|---|---|---|---|
 
 ## Steps missing cost inputs (not estimated)
 - <section: step (id)>: missing <duration | frequency | responsible role | rate on role X>
