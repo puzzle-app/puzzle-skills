@@ -1,6 +1,6 @@
 # Set up Puzzle for an agent
 
-You are an AI agent, and your user asked you to set up [Puzzle](https://puzzleapp.io) for them. Follow this page in order. It connects you to their Puzzle workspace and gives you the skills to work in it.
+You are an AI agent, and your user asked you to set up [Puzzle](https://puzzleapp.io) for them. Follow this page in order. It connects you to their Puzzle workspace, gives you the skills to work in it, and sets you up to record your work there as runs.
 
 Puzzle is a map of how a business runs: processes, the team, the tools and the data, with a changelog of decisions and a record of the runs agents perform. You reach it through the Puzzle MCP server. The skills are the method for using it well.
 
@@ -17,19 +17,55 @@ Pick the section that matches what you are.
 
 ### Claude Code
 
-Run these two commands in the shell:
+Three plugins make up the full setup. The aim is that all three are in place when you finish, whatever the user already had.
+
+| Plugin | What it gives |
+|---|---|
+| `puzzle` | The connection to Puzzle (the MCP server). |
+| `puzzle-skills` | The skills. It comes with either of the other two. |
+| `puzzle-runs` | Run logging: every session starts with the instruction to record mapped work as runs, and you are reminded once to close a run you left open. |
+
+First see what is already there. Run these in the shell:
 
 ```bash
 claude plugin marketplace add puzzle-app/puzzle-skills
 ```
 
 ```bash
+claude plugin marketplace update puzzle-skills
+```
+
+```bash
+claude plugin list
+```
+
+```bash
+claude mcp list
+```
+
+The first command says the marketplace is already added if it is; that is fine. Then install only what is missing:
+
+- **`puzzle`**: install it unless the plugin is already listed, or `claude mcp list` already shows a server at `https://app.puzzleapp.io/mcp`. A user who connected Puzzle another way keeps that connection; don't add a second one.
+- **`puzzle-runs`**: install it unless it is already listed.
+- **`puzzle-skills`**: no command needed. The other two bring it. If it was already installed, the update below brings it up to date.
+
+```bash
 claude plugin install puzzle@puzzle-skills --scope user
 ```
 
-This installs the Puzzle MCP server and the Puzzle skills together. If the user already has Puzzle connected to Claude Code, install `puzzle-skills@puzzle-skills` instead, which is the skills without a second connection.
+```bash
+claude plugin install puzzle-runs@puzzle-skills --scope user
+```
 
-A plugin loads when a session starts, so ask the user to start a new session. In it, they run `/mcp`, choose `plugin:puzzle:puzzle`, and sign in. Puzzle asks which workspace to connect.
+For each plugin that was already installed, update it, so the user is not left on an old version:
+
+```bash
+claude plugin update puzzle-skills@puzzle-skills
+```
+
+Tell the user that `puzzle-runs` turns run logging on for every Claude Code session on this machine, that it sends nothing itself (you make each logging call through their Puzzle connection), and that `claude plugin uninstall puzzle-runs@puzzle-skills` turns it off. If they want it for one project only, install it with `--scope project` from that project's folder instead.
+
+A plugin loads when a session starts, so ask the user to start a new session. If you installed `puzzle`, they run `/mcp` in it, choose `plugin:puzzle:puzzle`, and sign in. Puzzle asks which workspace to connect.
 
 ### Claude.ai, Claude Desktop or Cowork
 
@@ -55,8 +91,10 @@ Load the `start-here` skill (`/puzzle-skills:start-here` in Claude Code) and fol
 
 When you do real work that the workspace maps as a process, load `log-runs` and record it: one event per meaningful action, on the step it belongs to, and every run closed as success or failed. The step shows you working on the canvas, and the Runs page shows what happened.
 
+In Claude Code, `puzzle-runs` repeats this instruction at the start of every session, so later sessions log without being asked. Everywhere else, this page is the only reminder: tell the user that in a new conversation they may need to ask you to log the work.
+
 Runs is available on some workspaces only. If the `log_run_event` and `list_runs` tools are missing from your tool list, tell the user and carry on with the work; `log-runs` explains what that means.
 
 ## 5. Tell the user what you did
 
-Finish with a short summary: what was installed, which workspace is connected, and what `start-here` suggests doing first.
+Finish with a short summary: what was installed and what was already there, which workspace is connected, whether run logging is on and how to turn it off, and what `start-here` suggests doing first.
