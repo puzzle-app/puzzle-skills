@@ -56,7 +56,7 @@ Log one event per meaningful action, not per tool call:
 - **`event_id` on every event**, deterministic, for example `<ref>|<step_id>|<action>`. A repeated `event_id` comes back with `duplicate: true` and is not stored or counted twice, so retrying after a timeout is safe.
 - **`agent_person_id`**: the agent's own ai_agent person on the People canvas (`list_people`, person type ai_agent). With it, the canvas shows the agent's avatar and the By column shows its name. Without it, By reads "MCP agent". If the agent will log regularly and has no card, offer `map-the-team` to add one.
 - **`tool`**: the app the action happened in ("HubSpot"), so the event reads right on a step that uses several tools.
-- **Notes**: plain sentences, up to 5,000 characters. Never put secrets, tokens, passwords, full email bodies, or personal data the whole workspace shouldn't see. Point to the record with `related` instead of pasting it.
+- **Notes**: plain sentences, up to 5,000 characters, no HTML or markup in a note or a label. Never put secrets, tokens, passwords, full email bodies, or personal data the whole workspace shouldn't see. Point to the record with `related` instead of pasting it.
 
 ## 6. Sending
 
@@ -71,7 +71,7 @@ log_run_event {"events": [
 - Send live as the work happens, so the canvas glow tracks the agent. Batch (up to 100) only when logging after the fact.
 - Validate before you send. One bad event rejects the whole batch with an error per index, and nothing is stored. Fix it and resend the same `event_id`s.
 - "Too many events in the last minute" means the workspace limit (600 a minute through the MCP) was hit. Wait a minute and resend.
-- Allowances depend on the plan. As of 2026-11-26: Starter has 1,000 events in total per organization, as a hard stop. A batch that would pass it is refused, and the message names the upgrade. Paid plans meter per workspace per month with a soft cap. On Starter, log only the start, step-done and end events above. When the limit is reached, stop logging, tell the user, and keep doing the work.
+- Allowances depend on the plan. As of 2026-11-26: Starter has 1,000 events in total per organization, as a hard stop. A batch that would pass it is refused, and the message names the upgrade. Builder (5,000 a month) and Optimizer (25,000 a month) meter per workspace with a soft cap: events keep recording. Enterprise is uncapped. While an organization is in the Runs beta it counts as Optimizer. Test events and resent `event_id`s don't count. On Starter, log only the start, step-done and end events above. When the limit is reached, stop logging, tell the user, and keep doing the work.
 
 ## 7. Read it back
 
@@ -87,7 +87,7 @@ Reading also answers questions. `read-the-map` routes them here:
 | Who works this step, and how often | `list_runs` `step_id`, count events by `by` and month |
 | Is the agent running right now | `list_runs` `events: true`, `step_id`, check the latest `occurred_at` (a step stays lit for 60 seconds after an event with no status) |
 
-History goes back as far as the plan allows (7 days on Starter, longer on paid plans).
+History goes back as far as the plan allows: 7 days on Starter, 30 on Builder, 12 months on Optimizer, 2 years on Enterprise. `list_runs` returns 25 per page by default, up to 100 with `page_size`; page through with `page`.
 
 ## 8. Systems that are not agents: the webhook
 
@@ -99,7 +99,7 @@ POST /webhooks/runs/<workspace id>/steps/<step id>  (every event defaults to tha
 Authorization: Bearer <the workspace's Runs token>
 ```
 
-The body is one event, an array, or `{"events": [...]}`, with the fields above plus an optional `payload` (JSON, up to 16 KB). The URL and token are in the workspace's Runs settings, and only a person in the app can see or rotate the token. Never ask for the token in chat or write it into a step, note or asset. When `build-puzzle-process` maps an Automation step, offer to add the webhook call as that automation's last action, so the automation's runs show beside the agents'.
+The body is one event, an array, or `{"events": [...]}`, with the fields above plus an optional `payload` (JSON, up to 16 KB). The URL and token are in the workspace's Runs settings, and only a person in the app can see or rotate the token. A 404 means Runs is off for the workspace, a 402 means the Starter allowance is used up, and a 429 means more than 120 requests a minute. Never ask for the token in chat or write it into a step, note or asset. When `build-puzzle-process` maps an Automation step, offer to add the webhook call as that automation's last action, so the automation's runs show beside the agents'.
 
 ## Rules
 
