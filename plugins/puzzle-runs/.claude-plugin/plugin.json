@@ -1,0 +1,10 @@
+{
+  "name": "puzzle-runs",
+  "description": "Opt-in run logging for Puzzle. With this plugin on, an agent records the work it does on a mapped Puzzle process as runs without being asked, and is reminded once to close any run it left open. Needs a Puzzle connection on a workspace that has Runs.",
+  "author": { "name": "Brian Ragone", "url": "https://puzzleapp.io" },
+  "homepage": "https://puzzleapp.io",
+  "repository": "https://github.com/puzzle-app/puzzle-skills",
+  "license": "MIT",
+  "keywords": ["puzzle", "runs", "observability", "hooks", "agents"],
+  "dependencies": ["puzzle-skills"]
+}

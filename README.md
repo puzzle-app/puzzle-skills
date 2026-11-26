@@ -47,6 +47,22 @@ claude plugin install puzzle-skills@puzzle-skills --scope user
 
 Or inside a session: `/plugin marketplace add puzzle-app/puzzle-skills`, then `/plugin install puzzle-skills@puzzle-skills`. Skills arrive namespaced, so `/puzzle-skills:read-the-map` and friends. `claude plugin update puzzle-skills@puzzle-skills` pulls new versions.
 
+**Claude Code, with the Puzzle connector included.** If Puzzle isn't connected to Claude Code yet, install the `puzzle` plugin from the same marketplace instead. It adds the Puzzle MCP server and brings these skills with it as a dependency:
+
+```bash
+claude plugin install puzzle@puzzle-skills --scope user
+```
+
+Then run `/mcp` in a session, pick `plugin:puzzle:puzzle` and sign in. Details in [plugins/puzzle](plugins/puzzle/README.md).
+
+**Claude Code, with run logging on by default.** The `log-runs` skill loads when an agent reaches for it. To have every session record its work on a mapped process as runs without being asked, add the opt-in `puzzle-runs` plugin. It tells the agent to log at the start of each session and reminds it once to close a run it left open:
+
+```bash
+claude plugin install puzzle-runs@puzzle-skills --scope user
+```
+
+It needs a Puzzle connection on a workspace that has Runs. A project can pin the process its work belongs to in `.claude/puzzle-runs.json`. Details in [plugins/puzzle-runs](plugins/puzzle-runs/README.md).
+
 **Claude Code, without the marketplace.** Clone the repo into your skills folder. Claude Code loads any folder there that carries a plugin manifest:
 
 ```bash
@@ -122,6 +138,7 @@ Fork it, keep the sixteen, add the skills your operation needs: a client's namin
 
 ## Versions
 
+- **v1.12** (2026-11-26): two more plugins in this marketplace and a setup page for agents. No skill changed. **puzzle**: the Puzzle MCP connector for Claude Code, with these skills as a dependency, so a new user installs once and signs in. **puzzle-runs**: opt-in run logging by hooks; every session is told to record mapped work as runs with `log-runs`, a project can pin its process in `.claude/puzzle-runs.json`, and the agent is reminded once to close a run it left open. **get-started.md**: one page an agent can fetch and follow to connect Puzzle and install the skills in Claude Code, the Claude apps or any other agent.
 - **v1.11.2** (2026-11-26): log-runs: missing Runs tools can mean the session loaded its tool list before Runs was on; a new session tells. Found on Puzzle's own workspace the same day.
 - **v1.11.1** (2026-11-26): log-runs checked against the Runs spec from Puzzle's Head of Product. Adds: no HTML in notes or labels; the full allowance table (Builder and Optimizer soft caps, beta organizations count as Optimizer, test events and resends uncounted); history windows per plan; `list_runs` paging; the webhook's 404, 402 and 429 answers. No change to any other skill.
 - **v1.11** (2026-11-26): runs, events and tool spend. New skill **log-runs**: an agent records what it does on a mapped process with `log_run_event`, one event per meaningful action on the matching step, grouped by a `type:tool:id` reference into one run per record per section, opened with a label, closed with success or failed, an `event_id` on every event so retries are safe, `agent_person_id` so the canvas shows the agent, no secrets in notes, and `list_runs` to read back. Systems that aren't agents use the Runs webhook. map-tools-and-data logs charges (`create_tool_charges`, `list_tool_charges`, `update_tool_charges`): actuals from invoices beside the plan in cost items, refunds negative, one currency per tool, `duplicate_of` handled on the user's word. cost-a-process sets actual spend and measured frequency beside the model, labeled measured. evaluate-the-stack proves paid-but-unused with charges. audit-the-map gains tool spend and runs checks. find-automation-opportunities reads failure rates and measured waits from runs. read-the-map, start-here, build-puzzle-process and map-the-team point agents at log-runs. Runs is offered only when the workspace's organization has it; every skill treats a workspace without it as normal.

@@ -9,6 +9,16 @@
       "name": "puzzle-skills",
       "source": "./",
       "description": "Sixteen skills that make an MCP-connected agent competent in a Puzzle workspace."
+    },
+    {
+      "name": "puzzle",
+      "source": "./plugins/puzzle",
+      "description": "Puzzle in one install: the Puzzle MCP connector plus the sixteen skills (installs puzzle-skills as a dependency)."
+    },
+    {
+      "name": "puzzle-runs",
+      "source": "./plugins/puzzle-runs",
+      "description": "Opt-in run logging: agents record mapped work as runs without being asked, and are reminded once to close open runs (installs puzzle-skills as a dependency)."
     }
   ],
   "metadata": {

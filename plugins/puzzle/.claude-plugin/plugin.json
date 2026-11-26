@@ -1,0 +1,21 @@
+{
+  "name": "puzzle",
+  "description": "Puzzle in one install: the Puzzle MCP connector plus the sixteen skills that make an agent competent in a Puzzle workspace. Sign in once and your agent can read the map, build a process, map the team and the stack, cost a process, log decisions and record its own runs.",
+  "author": {
+    "name": "Brian Ragone",
+    "url": "https://puzzleapp.io"
+  },
+  "homepage": "https://puzzleapp.io",
+  "repository": "https://github.com/puzzle-app/puzzle-skills",
+  "license": "MIT",
+  "keywords": [
+    "puzzle",
+    "process-mapping",
+    "operations",
+    "mcp",
+    "skills"
+  ],
+  "dependencies": [
+    "puzzle-skills"
+  ]
+}

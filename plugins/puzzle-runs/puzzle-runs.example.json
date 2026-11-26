@@ -1,0 +1,9 @@
+{
+  "workspace": "Acme",
+  "section": "Renewals",
+  "section_id": 1234,
+  "ref_type": "deal",
+  "tool": "HubSpot",
+  "agent_person_id": 812,
+  "notes": "One run per deal. Skip deals under review."
+}
