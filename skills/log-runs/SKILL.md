@@ -11,7 +11,7 @@ Load `read-the-map` first. It explains step ids, sections, and why a write isn't
 
 ## 1. Is Runs on
 
-`log_run_event` and `list_runs` appear in the tool list only when the workspace's organization has Runs. If they are missing, say "Runs isn't turned on for this workspace" and carry on with the work. Don't substitute comments, tasks or changelog entries for events. A call that returns "Runs is not enabled for this workspace" means the same thing.
+`log_run_event` and `list_runs` appear in the tool list only when the workspace's organization has Runs. A session keeps the tool list it loaded when it started, so a session opened before Runs was turned on, or before the tools shipped, won't show them even when Runs is on. If they are missing, say "I can't see the Runs tools: either Runs isn't on for this workspace or this session started before it was; a new session will tell" and carry on with the work. Don't substitute comments, tasks or changelog entries for events. A call that returns "Runs is not enabled for this workspace" means the same thing.
 
 ## 2. Find the step
 
