@@ -410,6 +410,8 @@ Every step gets an `executor` — the field most often skipped, so set it explic
 
 The executor split drives costing, layout, and attributes: manual (Person) steps carry duration + frequency and a responsible role; Automation/AI Agent steps hang as drops (exception A) in hybrid layouts and carry the attributes they populate.
 
+**Steps an agent or automation will run are one action each.** When the workspace has Runs (`log_run_event` is in the tool list), agents record an event per step they finish (`log-runs`), so a step that bundles three actions can't show which one failed. Split it. Write the section's reference key in the section description, as the record type and the system that owns its id ("Runs: `deal:hubspot:<deal id>`"), so every agent and automation logging against this process groups its events the same way. On an Automation step, offer once to have the automation report to the Runs webhook as its last action (the URL and token are in the workspace's Runs settings, which a person opens; never put the token in a note).
+
 ---
 
 ## Roles — full RACI, not just the doer
@@ -551,7 +553,7 @@ Set `status: completed`, set the owner (`person_id` from `list_people`), then us
 
 ## After the build: offer to share
 
-End the closing message with one line: "Want this shared? I can make a shared view with this section, the team that owns it and the tools it uses." Nothing more. If the user says yes, `share-the-map` derives the view from the workspace, asks who it is for, and publishes after approval. If they say nothing, nothing is published. The offer never becomes a question in the intake round.
+End the closing message with one line: "Want this shared? I can make a shared view with this section, the team that owns it and the tools it uses." Nothing more. If the user says yes, `share-the-map` derives the view from the workspace, asks who it is for, and publishes after approval. If they say nothing, nothing is published. The offer never becomes a question in the intake round. When an agent will run this process and Runs is on, add one more line: "Agents that run this can log each run against these steps; `log-runs` has the method."
 
 ---
 

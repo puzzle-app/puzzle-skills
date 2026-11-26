@@ -33,6 +33,8 @@ Read the onboarding changelog entry first (`list_changelog_entries` with `query:
 | Workflows | `list_tabs` canvas `workflows`; `list_sections` per tab, `include: ["step_count"]`; for the first map, `list_steps` with `include: ["executor", "duration", "frequency", "roles.role_id", "tools.tool_id"]` | tabs; sections; steps; on the first map, steps missing executor, role, cost inputs or tool |
 | Record | `list_changelog_entries`, `include: ["status", "cost_analysis"]`; `list_shared_views`; `list_comments`, `resolved: false`, `top_level: true` | entries by status; entries with a cost analysis (both sides set); shared views; open comments by type (questions, pain points, ideas) |
 | Tags | `list_tag_groups`, `include: ["tag_count"]`; `list_tags`, `include: ["step_count"]` | groups; tags; tags on any step (none is not a gap; see stage 6) |
+| Spend | `list_tool_charges` per Active tool that has cost items | tools with charges; spent last 12 months (no charges is not a gap until the user tracks spend) |
+| Runs | only when `list_runs` is in the tool list: `list_runs`, then `status: "failed"` and `status: "none"` | runs; failed; still open; ai_agent people (who can be named on events). No `list_runs` tool means Runs isn't on for the workspace: say so once, not as a gap |
 
 Page through; `meta.total` is the count. A canvas is **as onboarding left it** when it has objects but the depth fields are empty, **in use** when most depth fields are filled, **empty** at zero.
 
@@ -74,7 +76,7 @@ Stopping is fine. The Workspace entry holds the state; "continue the round-out" 
 
 ### Stage 1: round out the tools
 
-Onboarding left the gallery picks. Add the tools the connected systems show that aren't on the canvas, and any a step names. Change: status on each, costs where a source states them (list price marked as such; an unconfirmed cost is not pushed), groups only past twelve tools. Through `map-tools-and-data`.
+Onboarding left the gallery picks. Add the tools the connected systems show that aren't on the canvas, and any a step names. Change: status on each, costs where a source states them (list price marked as such; an unconfirmed cost is not pushed), groups only past twelve tools. When a billing source is connected (Stripe, QuickBooks, a card export, invoices in email) and the user wants actual spend tracked, offer the last twelve months of charges per tool, as a push plan. Through `map-tools-and-data`.
 
 ### Stage 2: data model
 
@@ -90,7 +92,7 @@ Onboarding left teams and roles from the org chart, without rates. Change: an ho
 
 ### Stage 5: round out the people
 
-Onboarding left people cards. Sources in order: the existing people; the Google Workspace directory and the Slack user list where those connectors are present (Puzzle has no directory connector of its own); a CSV; LinkedIn, searched for people at the company, as a recommendation list the user confirms name by name, public titles only; the user. Change: a role on every person who holds none, type and email where blank, tool access from stage 1 where a source states it, and the Details a source states (the directory's phone, location and start date; Slack's time zone; `active: false` with an `end_date` for anyone the directory shows as gone). Add: missing people, confirmed. Batches of 50. Through `map-the-team`.
+Onboarding left people cards. Sources in order: the existing people; the Google Workspace directory and the Slack user list where those connectors are present (Puzzle has no directory connector of its own); a CSV; LinkedIn, searched for people at the company, as a recommendation list the user confirms name by name, public titles only; the user. Change: a role on every person who holds none, type and email where blank, tool access from stage 1 where a source states it, and the Details a source states (the directory's phone, location and start date; Slack's time zone; `active: false` with an `end_date` for anyone the directory shows as gone). Add: missing people, confirmed. Batches of 50. Every AI agent that will do work on the map, including the one running this skill, gets an ai_agent person in the role it fills, so its events on the Runs page carry its name and avatar (`log-runs`). Through `map-the-team`.
 
 ### Stage 6: the first map, then the next thing
 
@@ -98,6 +100,7 @@ Onboarding usually left one process Nova built. Round it out first: `audit-the-m
 
 - **Build the next process**: `interview-for-a-process` if it has to come out of someone's head, then `build-puzzle-process`.
 - **Analyze this one for opportunities**: `find-automation-opportunities`, with `cost-a-process` for the figures.
+- **Run it with an agent, and record it**: when Runs is on and an agent will do the work this map describes, `log-runs` makes every run show on the map.
 
 ### The Workspace entry
 

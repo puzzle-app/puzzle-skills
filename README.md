@@ -1,6 +1,6 @@
 # Puzzle skills
 
-**Fifteen skills that make an MCP-connected agent competent in a [Puzzle](https://puzzleapp.io) workspace. Start in the right place, read the map, build a process, interview for one, map the team, map tools and data, map the assets inside them, log a decision, cost a process, find what to improve, audit what's there, share it, brief a role, answer what breaks if we change this, and check whether the stack already does it.**
+**Sixteen skills that make an MCP-connected agent competent in a [Puzzle](https://puzzleapp.io) workspace. Start in the right place, read the map, build a process, interview for one, map the team, map tools and data, map the assets inside them, log a decision, cost a process, find what to improve, audit what's there, share it, brief a role, answer what breaks if we change this, check whether the stack already does it, and record the work an agent does as runs on the map.**
 
 The Puzzle MCP gives an agent the tools: list, create, update, link, across the four canvases and the changelog. It does not give the agent the method. Connect Claude to a workspace with nothing else and the first map it builds has steps with no executor, a fork with a branch that goes nowhere, a role with no hourly rate so the cost sidebar reads zero, and arrows entering steps from the wrong side. I know because I watched it happen, then wrote down every correction.
 
@@ -8,9 +8,9 @@ These skills are those corrections, split by what the map can do rather than by 
 
 They are plain `SKILL.md` files in the open Agent Skills format. Claude Code, Cowork, claude.ai and Claude Desktop read them as is. Any other agent that can read a markdown file and call the Puzzle MCP can use them too.
 
-**[The fifteen skills](#the-fifteen-skills)** · [Install](#install) · [Where to start](#where-to-start-by-role) · [How they fit together](#how-they-fit-together) · [What they never do](#what-they-never-do)
+**[The sixteen skills](#the-sixteen-skills)** · [Install](#install) · [Where to start](#where-to-start-by-role) · [How they fit together](#how-they-fit-together) · [What they never do](#what-they-never-do)
 
-## The fifteen skills
+## The sixteen skills
 
 | Skill | What the agent can do once it has it | Writes? |
 |---|---|---|
@@ -19,7 +19,7 @@ They are plain `SKILL.md` files in the open Agent Skills format. Claude Code, Co
 | [build-puzzle-process](skills/build-puzzle-process/SKILL.md) | Build a complete process in one shot, from a description or a transcript: one intake round, as few sections as possible, every step typed, owned, costed and noted, a conditional trace and a handle table for the connectors, a visual check, a changelog entry. | Yes |
 | [interview-for-a-process](skills/interview-for-a-process/SKILL.md) | Prepare the questions for one conversation about one process, in run order, mapped to the fields a step needs. For a teammate, a client, or yourself. | No |
 | [map-the-team](skills/map-the-team/SKILL.md) | Teams, roles with hourly rates and their basis, reporting lines, people in roles, tool access. Roles own steps; people hold roles. | Yes |
-| [map-tools-and-data](skills/map-tools-and-data/SKILL.md) | The tech stack with costs and status, the records and fields each tool holds, the templates and reports inside tools, and the links from all of it to the steps that use it. | Yes |
+| [map-tools-and-data](skills/map-tools-and-data/SKILL.md) | The tech stack with costs (the plan) and charges (what each tool actually billed), status, the records and fields each tool holds, the templates and reports inside tools, and the links from all of it to the steps that use it. | Yes |
 | [map-tool-assets](skills/map-tool-assets/SKILL.md) | What lives inside the tools: boards, templates, reports, automations, videos, help articles, pulled through your connected MCP connectors, proposed, created with their URLs and linked to the steps that use them. | Yes |
 | [log-a-decision](skills/log-a-decision/SKILL.md) | A changelog entry with the rationale, the trade-offs, the specs, the owner, the status, and links to the steps and tools it touches. | Yes |
 | [cost-a-process](skills/cost-a-process/SKILL.md) | Labor and allocated tool cost per step, section and tab; the net, hours returned and payback against a future state. Every figure traces to the map; nothing is estimated. | No |
@@ -29,6 +29,7 @@ They are plain `SKILL.md` files in the open Agent Skills format. Claude Code, Co
 | [brief-a-role](skills/brief-a-role/SKILL.md) | The brief for one role, in "you" voice: what you own, each process you touch with your steps in order, what runs around you, the friction, who to ask. For a new hire, a handover, a cover. | No |
 | [share-the-map](skills/share-the-map/SKILL.md) | A public shared view for an audience: the sections, the teams whose roles own them, the tool groups they use, people only when the audience should see names. Asks who it's for, extends an existing view, warns about draft work, logs it. Runs on a yes to the offer at the end of a build. | Yes, after approval |
 | [audit-the-map](skills/audit-the-map/SKILL.md) | Every gap between the map and a complete, current picture, scored and ranked, with the fixes proposed and applied one approved batch at a time. | After approval |
+| [log-runs](skills/log-runs/SKILL.md) | Record what an agent does as events on the steps it works, grouped by a reference key (`deal:hubspot:12345`) into one run per record per section. The step glows while the agent works; every run closes with success or failed; retries are safe; reads back what happened, what failed, and who runs a step. Covers the Runs webhook for Zapier, Make, n8n and scripts. | Yes, events only |
 
 ## Install
 
@@ -66,7 +67,7 @@ The skills don't change by role. The reading order does.
 | **An ops lead** mapping a department | start-here, map-the-team | interview-for-a-process per teammate, build-puzzle-process per process, share-the-map to the team that runs it, log-a-decision every time something changes | audit-the-map before a review, cost-a-process for the budget conversation, brief-a-role for every new seat |
 | **An IT or transformation lead** | start-here, map-tools-and-data, map-tool-assets | change-impact before every system change, evaluate-the-stack before every purchase, log-a-decision after both | audit-the-map, find-automation-opportunities for the roadmap, cost-a-process for the case |
 | **A consultant** mapping a client | start-here on the client workspace, then interview-for-a-process | map-tools-and-data, map-tool-assets and map-the-team as the interviews surface them, build-puzzle-process on a Current State tab, share-the-map per client team, log-a-decision for every decision | find-automation-opportunities and cost-a-process for the proposal; build-puzzle-process again on a Future State tab |
-| **An agent builder** | start-here, read-the-map | map-tools-and-data and map-tool-assets (the data and the things your agent reads and writes), log-a-decision when an agent takes over a step | audit-the-map to keep the map your agent runs on close to reality |
+| **An agent builder** | start-here, read-the-map, log-runs | map-the-team (an ai_agent person for each agent), map-tools-and-data and map-tool-assets (the data and the things your agent reads and writes), log-a-decision when an agent takes over a step | audit-the-map to keep the map your agent runs on close to reality; cost-a-process and find-automation-opportunities read what the runs measured |
 
 ## How they fit together
 
@@ -87,6 +88,8 @@ cost-a-process ← find-automation-opportunities     what it costs, what to chan
 change-impact · evaluate-the-stack · brief-a-role   what breaks if we change it, do we already have it, how a role reads it
         ↓
 audit-the-map               what drifted, fixed in approved batches
+
+log-runs                    while the work runs: every agent action an event on its step, grouped into runs
 
 read-the-map                under all of it: the calls, the fields, the vocabulary, how to answer from the map
 ```
@@ -110,7 +113,7 @@ skills/<name>/SKILL.md      one folder per skill; add your own alongside
 scripts/package.sh          zips each skill into dist/<name>.skill for upload
 ```
 
-Fork it, keep the fifteen, add the skills your operation needs: a client's naming conventions, a regulated approval path, a house style for notes. Skills that are specific to one business belong in that business's fork, not here.
+Fork it, keep the sixteen, add the skills your operation needs: a client's naming conventions, a regulated approval path, a house style for notes. Skills that are specific to one business belong in that business's fork, not here.
 
 ## Related
 
@@ -118,6 +121,8 @@ Fork it, keep the fifteen, add the skills your operation needs: a client's namin
 - [grokbot-delivery-team](https://github.com/puzzle-app/grokbot-delivery-team) is a consultancy's delivery team as Grok Bot agents, with Puzzle as the shared memory; several of its skills are the consultant-specific ancestors of these.
 
 ## Versions
+
+- **v1.11** (2026-11-26): runs, events and tool spend. New skill **log-runs**: an agent records what it does on a mapped process with `log_run_event`, one event per meaningful action on the matching step, grouped by a `type:tool:id` reference into one run per record per section, opened with a label, closed with success or failed, an `event_id` on every event so retries are safe, `agent_person_id` so the canvas shows the agent, no secrets in notes, and `list_runs` to read back. Systems that aren't agents use the Runs webhook. map-tools-and-data logs charges (`create_tool_charges`, `list_tool_charges`, `update_tool_charges`): actuals from invoices beside the plan in cost items, refunds negative, one currency per tool, `duplicate_of` handled on the user's word. cost-a-process sets actual spend and measured frequency beside the model, labeled measured. evaluate-the-stack proves paid-but-unused with charges. audit-the-map gains tool spend and runs checks. find-automation-opportunities reads failure rates and measured waits from runs. read-the-map, start-here, build-puzzle-process and map-the-team point agents at log-runs. Runs is offered only when the workspace's organization has it; every skill treats a workspace without it as normal.
 
 - **v1.10** (2026-11-20): the Puzzle MCP's newest fields. Roles carry a status (draft, planned, hiring, filled, archived; `future` and `open` are refused) and a type (internal, external); people carry Details (Active or Inactive, phone, location, time zone, start and end date). map-the-team sets both and handles someone leaving (Inactive with an end date, never deleted); read-the-map, start-here, audit-the-map and brief-a-role read them. log-a-decision covers `current_state_exclude` and one section or tab on both sides while the two filters differ. build-puzzle-process puts a new tab in its sidebar folder, sets status on the roles it creates, and leaves open items on the map as tasks. map-tools-and-data corrects attributes and renames tool groups in place (`update_attributes`, `update_tool_groups`); map-tool-assets updates assets in place (`update_assets`). audit-the-map flags seats and people that disagree with the map and clears a subflow whose section is gone. No description changed; every frontmatter still passes package.sh's strict YAML check.
 - **v1.9.2** (2026-11-19): valid YAML frontmatter in every skill. Nine descriptions held a colon followed by a space, which strict YAML parsers reject, so clients that parse frontmatter strictly could not load brief-a-role, change-impact, cost-a-process, evaluate-the-stack, find-automation-opportunities, map-the-team, map-tools-and-data, share-the-map or start-here. Those descriptions are now quoted; the text is unchanged. `scripts/package.sh` now refuses to package a skill whose frontmatter does not parse, whose name does not match its folder, or whose description runs past 1,024 characters. Thanks to Mike Roberts for the fix (PR 2).

@@ -108,4 +108,4 @@ Create a changelog entry with `log-a-decision`: the teams and roles created, eac
 - A reporting line runs from the manager's bottom handle to the report's top handle. Never left or right. Side handles chain peers sideways, and the chart stops reading as a tree.
 - No line between peers. Exactly one line per manager-report pair. Org charts and people charts stay `top_to_bottom`: one row per level, that manager's reports on the row beneath, nothing crossing.
 - Titles from the user's organisation win over generic ones. If they say "Ops Lead", the role is "Ops Lead".
-- An AI agent that owns steps is a person of type `ai_agent` in a role, so the map shows which seat the agent fills and what it costs to run instead.
+- An AI agent that owns steps is a person of type `ai_agent` in a role, so the map shows which seat the agent fills and what it costs to run instead. Its person id is also the `agent_person_id` the agent puts on every event it logs (`log-runs`), so the Runs page and the glowing step show its name and avatar rather than "MCP agent". Create one for each agent that will log, give it an avatar, and grant it the tools it acts in.

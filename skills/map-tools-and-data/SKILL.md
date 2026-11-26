@@ -1,6 +1,6 @@
 ---
 name: map-tools-and-data
-description: 'Build or extend the Tools canvas and the data model of a Puzzle workspace through the Puzzle MCP: the tools the operation runs on with their costs and status, as few tool groups as possible, the entities and attributes each tool holds, and the links from attributes to the steps that read or write them; hands bulk asset discovery to map-tool-assets. Load when the user asks to "map our tools", "add our tech stack", "add tool costs", "set up the data model", "which fields does this step touch", "map our templates and reports", "add our Zaps and automations", or when a process build names a tool, record or field that doesn''t exist yet. One intake round, propose before writing, link to steps, changelog at the end.'
+description: 'Build or extend the Tools canvas and the data model of a Puzzle workspace through the Puzzle MCP: the tools the operation runs on with their costs, actual charges and status, as few tool groups as possible, the entities and attributes each tool holds, and the links from attributes to the steps that read or write them; hands bulk asset discovery to map-tool-assets. Load when the user asks to "map our tools", "add our tech stack", "add tool costs", "log this invoice", "record what we paid for X", "set up the data model", "which fields does this step touch", "map our templates and reports", "add our Zaps and automations", or when a process build names a tool, record or field that doesn''t exist yet. One intake round, propose before writing, link to steps, changelog at the end.'
 ---
 
 # Map tools and data
@@ -11,7 +11,7 @@ Load `read-the-map` first. The `tool_id` versus `account_tool_id` distinction ma
 
 ## Three things the Tools canvas holds
 
-- **Tools**: systems from Puzzle's catalogue added to the workspace, with status (Active, Considering, Cancelled), notes, and cost items (per seat, flat, usage, one time). Grouped into tool groups (Marketing, Finance, Delivery) or standalone.
+- **Tools**: systems from Puzzle's catalogue added to the workspace, with status (Active, Considering, Cancelled), notes, cost items (the plan: per seat, flat, usage, one time) and charges (the Spend: what the tool actually charged, invoice by invoice). Grouped into tool groups (Marketing, Finance, Delivery) or standalone.
 - **Entities and attributes**: the records a tool holds (Contact, Deal, Ticket, Invoice) and their fields, each with a type. Attributes link to steps as trigger, input or output.
 - **Assets**: the named things inside a tool with a URL: a board, a list, a dashboard, a template, a form, a document, a video, an automation, a sequence, a skill. Assets link to the steps that use them.
 
@@ -65,7 +65,7 @@ Sample:  <one row as it will land, every field>
 Nothing is written until you approve. Approve to push, or edit the list.
 ```
 
-One block for the Tools canvas (tools, groups, costs, status) and one for the data model (entities, attributes, links to steps). The push writes exactly what the block says. Anything discovered mid-push that is not in the block is reported, not pushed. When a push is split into batches, the block says "in N batches", one approval covers them, and a failed batch stops the rest and reports.
+One block for the Tools canvas (tools, groups, costs, status, and charges with their total per tool and currency) and one for the data model (entities, attributes, links to steps). The push writes exactly what the block says. Anything discovered mid-push that is not in the block is reported, not pushed. When a push is split into batches, the block says "in N batches", one approval covers them, and a failed batch stops the rest and reports.
 
 ## Build
 
@@ -75,6 +75,12 @@ One block for the Tools canvas (tools, groups, costs, status) and one for the da
 4. **Assets.** A handful of assets the user names go in here: `create_assets` with `account_tool_id` (or `tool_id`), `name`, `type`, `url`, `description`, `status`, and `step_ids`. For anything more, and for discovering what lives inside connected tools, run `map-tool-assets`; it owns the type mapping, the connector crawl and the matching to steps.
 5. **Link attributes to steps.** `link_to_steps` with type attribute, `attribute_id`, `step_id`, and `kind` (trigger, input, output). Re-linking an attribute already on a step updates its kind.
 6. **Link tools to steps** that name them but aren't linked: `link_to_steps` with type tool and the catalogue `tool_id`. The first tool linked becomes the step's primary tool.
+7. **Charges (actual spend), when the user tracks it.** Cost items are the plan; charges are what was paid. Log a charge only from a source document: an invoice, a receipt, a card or bank statement line, a billing export, or the billing system read through a connector (Stripe, QuickBooks, Xero, receipts in email). First, `list_tool_charges` per tool, to read `meta.currency` and the charges already logged. Then `create_tool_charges` (up to 100 per call) with `account_tool_id`, `amount` as a decimal string, `charged_on` (YYYY-MM-DD, the date charged), `reference` (the invoice number or charge id), `period_start` and `period_end` (what it covers), `url` (the invoice), `cost_item_id` (the plan line it pays, from `list_tools` `include: ["cost_items"]`) and a `note`.
+   - **Refunds** are negative amounts, as their own charge. Leave the original in place.
+   - **Currency.** Every charge on a tool is in the tool's one currency (its cost items', else the workspace's), and a mismatch is refused. Convert, and put the original amount, currency and rate in the note.
+   - **Duplicates.** If a `reference` is already logged, the charge **is still saved** and comes back with `duplicate_of`. Report it at once and, on the user's word, remove the new one with `update_tool_charges` `{id, delete: true}`. Never create it a second time.
+   - **Corrections** go through `update_tool_charges` by id. Omitted fields stay as they are.
+   - Never log an estimate, a quote or a list price as a charge, and never change a cost item to match one month's invoice. When actuals and plan disagree, report it and let the user decide which is wrong.
 
 ## Verify
 
@@ -82,6 +88,7 @@ One block for the Tools canvas (tools, groups, costs, status) and one for the da
 - `list_entities` with `include: ["attribute_count"]` and `list_attributes` with `include: ["steps.step_name", "steps.kind"]`: every attribute exists and links where the proposal said.
 - `list_assets` with `include: ["step_count", "status"]`: counts match; spot-check the heaviest-linked asset and any constructed URL.
 - `list_steps` with `tool_id` for each new tool: the steps that name it are linked.
+- `list_tool_charges` per tool charged: the count and `meta.total` match the push plan, no unexpected `duplicate_of`, and `meta.spent_last_12_months` is reported beside the cost items annualized.
 
 ## Log it
 
@@ -98,4 +105,5 @@ A changelog entry with `log-a-decision`: tools added or changed with costs and s
 - Never invent a cost or a URL. List prices are marked as list prices; constructed URLs are marked unverified until someone clicks one.
 - Don't rewrite step notes to match an asset. Record the mismatch in the asset's description.
 - `cost_items` replaces the whole set. Read before you write, or you delete costs.
+- Charges are financial records: shown in a push plan, written on approval, each traced to its invoice. This skill never pays, never opens billing and never touches a payment method.
 - Catalogue `tool_id` for linking steps and creating tools; workspace `account_tool_id` for data, assets, people and the changelog.

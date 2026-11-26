@@ -26,6 +26,8 @@ Load `read-the-map` first. Use `cost-a-process` for any dollar figure.
 6. `list_tag_groups` with `include: ["description", "tags.id", "tags.name"]`, in case the team already tags steps by priority, friction or project; findings reuse those groups. Steps already tagged Bottleneck or Error-prone (or the team's own words for them) are friction someone has marked: start there.
 7. `list_comments` with `type: "pain_point"`, `resolved: false`, `top_level: true` and `include: ["step_name", "section_name", "author", "created_at", "replies"]`, scoped by `section_id`; then the same with `type: "idea"` for improvements people have already suggested. A comment on a section rather than a step applies to the section as a whole.
 
+8. Runs, when `list_runs` is in the tool list: `list_runs` with `events: true` per section in scope, and with `status: "failed"`. This is evidence of how the work actually runs, over the history the plan allows.
+
 ## Read the friction, not only the automation candidates
 
 Before classifying, read each section in flow order and mark what slows it:
@@ -35,6 +37,7 @@ Before classifying, read each section in flow order and mark what slows it:
 - **Hand-backs**: a loop-back or go-to that returns work to an earlier role. Each one is a question: why does it come back, and could the first pass catch it.
 - **Ownership gaps**: a Person step with no responsible role, a conditional with no one deciding it, a section with no owner in its note, an approver on a step that never waits for approval.
 - **Double entry**: two steps in different tools writing the same attribute (the data model shows it); a step whose note says "copy", "re-enter", "same as".
+- **What the runs show**, when there are any: a step where about one run in five or more fails (read the failure notes for the cause); a long gap between one step's event and the next step's in the same run (the wait is measured, not guessed); events per month far above or below the mapped frequency; a Person step whose events show it is already done by an agent or a system. Cite the run count and period. A measured wait or failure rate outranks a note that says "this is slow".
 - **Dead ends**: a branch that ends with no terminator, a status Draft inside a Live section.
 
 Each of these is an opportunity whether or not software fixes it. Some are fixed by a rule, a template, or moving a step; say which.
@@ -68,7 +71,7 @@ Every opportunity gets a tier before a rank:
 
 ## Rank
 
-1. Steps touched, weighted by pain: a step with an open pain_point comment, or a pain point in a note or a changelog entry, counts double. Several people reporting the same pain on one step is stronger evidence than one; say how many.
+1. Steps touched, weighted by pain and evidence. Measured failures and waits from runs count like a pain_point comment: a step with an open pain_point comment, or a pain point in a note or a changelog entry, counts double. Several people reporting the same pain on one step is stronger evidence than one; say how many.
 2. Prerequisites already met.
 3. Hours per month returned, where duration and frequency exist on the steps touched (duration ÷ 60 × frequency, summed). Where either is missing on a step, the figure is "not defensible: missing duration or frequency" and the gap is reported, not estimated.
 4. Risk: what breaks if the automation misfires, and how visible it is. A wrong email to a customer outranks a wrong internal tag.
@@ -95,6 +98,7 @@ From the current state map on <date>. <n> sections, <n> Person steps reviewed.
 ### 1. <Name>: <Automate | AI agent | Assist | Fix> · 🔴|🟡|🟢
 Steps touched: <section: step (id), ...>
 Pain resolved: <pain_point comments by step and who raised them, then notes, changelog, interview, or "none recorded">
+Evidence from runs: <failure share, median wait, events/mo vs mapped, n runs over period | "no runs logged">
 What changes: <two lines: who or what does it after, and what the human still does>
 Prerequisites: <system · data · integration · decision · build>
 Phase: <Now | Next | Later>
@@ -133,4 +137,5 @@ When the user picks opportunities to pursue:
 - Never claim a tool can do something you haven't verified on the vendor's documentation or that the user has confirmed. Say "if <tool> supports X" when you haven't.
 - Regulated or constrained steps are never proposed for automation without the user's explicit say-so, recorded in the changelog.
 - An AI agent step almost always needs a human review step after it. Include it, and cost it.
+- Once an Automation or AI Agent step is live, its runs are the proof: offer `log-runs` for the agent, or the Runs webhook for the automation, so the before and after can be measured.
 - The roadmap is a proposal. The user decides what goes in the future state.

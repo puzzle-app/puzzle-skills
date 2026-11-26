@@ -38,6 +38,8 @@ Pull everything the checks need, in as few calls as the scope allows:
 12. `list_shared_views` with `include: ["items.type", "items.id", "items.name"]`.
 13. `list_tags` with `include: ["tag_group_name", "step_count"]`, when the workspace has tag groups.
 14. `list_comments` with `resolved: false`, `top_level: true` and `include: ["author", "created_at", "step_name", "section_name", "replies"]`.
+15. Charges, when the workspace logs them: `list_tool_charges` per Active tool with cost items, for `meta.spent_last_12_months` and the latest `charged_on`.
+16. Runs, when `list_runs` is in the tool list: `list_runs` with `status: "failed"` and with `status: "none"`, and `list_runs` with `events: true` for the steps in scope, over the history the plan allows.
 
 Save the raw results if the workspace is large; the checks run over the whole set.
 
@@ -93,7 +95,22 @@ Each check names what it finds, why it matters, and the fix. Severity: **blocks*
 | Tool with status Active and no cost items | weakens for costing | Tool cost is unknown | Ask for the cost; set `cost_items` |
 | Entity with no attributes | tidies | A record with no fields | Propose attributes or delete |
 | Attribute linked to no steps | tidies | A field nothing touches | Link it or leave it, noted |
+| Active tool with cost items and no charge in 90 days, in a workspace that logs charges | weakens | Either billing stopped and the plan is stale, or charges aren't being logged | Ask; log the missing charges or fix the status and cost items |
+| Actual 12-month spend more than about 10% above the cost items annualized | weakens for costing | Every cost figure built on the plan is low | Show plan and actual; the user decides which to correct |
+| Tool with charges and no cost items | weakens for costing | Real spend the cost model can't allocate | Propose cost items from the charges, marked proposed |
+| Charge with no reference, or two charges sharing one | tidies | Can't trace it to an invoice, or it may be counted twice | Ask for the invoice; on a confirmed duplicate, remove it on the user's word |
 | Asset Deprecated but still linked to Live steps | weakens | The step points at a dead template | Replace or unlink |
+
+### Runs (when the workspace has Runs)
+
+| Check | Severity | Why | Fix |
+|---|---|---|---|
+| Step with events but no executor | blocks | Work is happening there and the map can't say who or what does it | Set the executor from the events' By (agent, person, system) |
+| Step whose events come from an agent or system but whose executor is Person (or the reverse) | weakens | The map and the record disagree on who does the work | Ask; fix the executor or the logging |
+| Run with no status and no event in more than a day | weakens | It reads as stuck, or the agent never closed it | Ask the owner whether it is waiting or abandoned; the agent closes it with `failed` and a note, or a person resolves it in the app |
+| Failed run with no note | weakens | The failure can't be acted on | Ask whoever ran it; agents that log follow `log-runs` |
+| Step with a high failure share (about one run in five or more over the period) | weakens | The step breaks often | List it for `find-automation-opportunities` and the process owner |
+| Live step in a section with runs that never receives events | tidies | Skipped in practice, or simply not logged | Ask which |
 
 ### Decisions and housekeeping
 
@@ -176,6 +193,7 @@ Only after the user approves, and one batch at a time:
 
 - Reading is free; writing waits for approval. A finding is never silently "fixed".
 - Never invent a rate, a duration, a tool or an owner to close a gap. Propose, mark proposed, ask.
+- Runs and charges are read, never edited, by this skill. Agents don't rename or delete runs; people do that in the app.
 - Leave Archived content alone unless the user scopes it in.
 - Report counts from a full page-through. "At least" when you stopped early, and say why.
 - A clean audit is a result. Say "no blocks, three tidies" and stop; do not manufacture findings.
