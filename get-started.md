@@ -57,7 +57,7 @@ claude plugin install puzzle@puzzle-skills --scope user
 claude plugin install puzzle-runs@puzzle-skills --scope user
 ```
 
-For each plugin that was already installed, update it, so the user is not left on an old version:
+For each plugin that was already installed, update it, so the user is not left on an old version. Use the plugin's own name, and add `--scope project` or `--scope local` if `claude plugin list` shows it installed at that scope:
 
 ```bash
 claude plugin update puzzle-skills@puzzle-skills
